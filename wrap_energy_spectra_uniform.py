@@ -60,8 +60,8 @@ if __name__ == "__main__":
         en_value[i] = np.sum(weight[ (en_bin[i]<=gamma) & (gamma<en_bin[i+1]) ])/(1000.0/binsize)
       return (en_grid, en_value)
 
-  to_path='./cannon_a190_n60/'
-  from_path = './cannon_a190_n60/'
+  to_path='./uniform_a190_n15/'
+  from_path = './uniform_a190_n15/'
   ######### Parameter you should set ###########
   start   =  3  # start time
   stop    =  30  # end time
@@ -75,12 +75,12 @@ if __name__ == "__main__":
   #if (os.path.isdir('jpg') == False):
   #  os.mkdir('jpg')
   ######### Script code drawing figure ################
-  n0=60.0
+  n0=15.0
   R=1.8e-6
   L=15e-6
   Ntot = np.pi*R*R*L*n0*denunit
   V=(1.0/20.0)*(1.0/15.0)*(1.0/15.0)*1.0e-18
-  weight = V*denunit*n0/50.0 
+  weight = V*denunit*n0/20.0 
 #  weight = Ntot/(1200*360*360*50)
 
   set_relativistic =1 
@@ -141,4 +141,4 @@ if __name__ == "__main__":
       fig.set_size_inches(10.0, 6.0)
       fig.savefig(to_path+'proton_spectrum_'+str(n).zfill(4)+'.png',format='png',dpi=80)
       plt.close("all")
-      print('finished!'+str(n).zfill(4)+'_'+str(0).zfill(4))      
+      print('finished!'+str(n).zfill(4))      

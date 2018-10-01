@@ -82,7 +82,7 @@ if __name__ == "__main__":
 #  V=(1.0/20.0)*(1.0/15.0)*(1.0/15.0)*1.0e-18
 #  weight = V*denunit*n0/50.0 
 #  weight = Ntot/(1200*360*360*50)
-  limit_theta = 10 # angular limitation
+  limit_theta = 5 # angular limitation
 
   set_relativistic =1 
   
@@ -119,11 +119,11 @@ if __name__ == "__main__":
     plt.ylabel('dN/dE [per MeV]',fontdict=font)
     plt.xticks(fontsize=20); plt.yticks(fontsize=20);
     plt.yscale('log')
-    #plt.ylim(2e7,8e9)
+    plt.ylim(1e7,1e10)
     plt.xlim(5,700)
     plt.grid(which='major',color='k', linestyle='--', linewidth=0.3)
     plt.grid(which='minor',color='k', linestyle='--', linewidth=0.1)
-    plt.title(r'$\theta$'+'< '+str(limit_theta)+'$^o$')
+    plt.title(r'$\theta$'+'< '+str(limit_theta)+'$^o$',fontsize=20)
     plt.legend(loc='best',fontsize=20,framealpha=1.0)
     plt.subplots_adjust(left=None, bottom=0.15, right=0.95, top=0.95,
               wspace=None, hspace=None)
