@@ -55,8 +55,8 @@ def processplot(n):
   #youwant field  ex,ey,ez,bx,by,bz,ex_averaged,bx_averaged...
   #youwant Derived electron_density,electron_ekbar...
   #youwant dist_fn electron_x_px...
-  to_path='./uniform_a190_n60/'
-  from_path = './uniform_a190_n60/'
+  to_path='./uniform_a190_n50/'
+  from_path = './uniform_a190_n50/'
   
   
   

@@ -64,23 +64,22 @@ def processplot(n):
 
   gg = (px**2+py**2+pz**2+1)**0.5
   Ek = (gg-1)*1836*0.51
-  pr = (py**2+pz**2)**0.5 
- 
+  
   fig = plt.figure()
   ax  = fig.add_subplot(111)
 #  ax.set_ylim(0, 90)
 #  ax.set_yticks([0,30,60])
 #  ax.set_rlabel_position(0)
 
-  img = ax.scatter(r[:,n-10], pr[:,n-10], c='blue',  s=10., edgecolors='None', alpha=0.5)
+  img = ax.scatter(r[:,n-10], theta[:,n-10], c='red',  s=10., edgecolors='None', alpha=0.5)
 #  fig.colorbar(img,cax=cax,label='time [fs]', ticks=[200,240,280,320,360])
-  ax.set_xlim(0,6)
-  ax.set_ylim(-0.01,0.21)
+  ax.set_xlim(0,5.5)
+  ax.set_ylim(0.,45.)
   ax.set_xlabel(r'$r\ [\mu m]$',fontdict=font)
-  ax.set_ylabel(r'$p_r [m_ic]$',fontdict=font)
+  ax.set_ylabel(r'$\theta\ [^o]$',fontdict=font)
   ax.tick_params(axis='x',labelsize=20)
   ax.tick_params(axis='y',labelsize=20)
-  ax.set_title(r'$r-p_r$'+'_'+str(n), va='bottom', y=1., fontsize=20)
+  ax.set_title(r'$r-\theta_r$'+'_'+str(n), va='bottom', y=1., fontsize=20)
 #  plt.text(-100,650,' t = '++' fs',fontdict=font)
   plt.subplots_adjust(left=0.10, bottom=None, right=0.86, top=None,
                 wspace=None, hspace=None)
@@ -95,7 +94,7 @@ def processplot(n):
 
   fig = plt.gcf()
   fig.set_size_inches(10, 7.5)
-  fig.savefig(to_path+'r_p_'+str(n).zfill(4)+'.png',format='png',dpi=160)
+  fig.savefig(to_path+'r_theta_'+str(n).zfill(4)+'.png',format='png',dpi=160)
   plt.close("all")
   print('finised ')
 

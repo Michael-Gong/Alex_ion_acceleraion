@@ -58,8 +58,8 @@ def processplot(n):
   #youwant Derived electron_density,electron_ekbar...
   #youwant dist_fn electron_x_px...
   
-  from_path = './cannon_a190/'
-  to_path   = './cannon_a190_n30/'
+  from_path = './uniform_a190_n50/'
+  to_path   = './uniform_a190_n50/'
   
   
   ######### Script code drawing figure ################

@@ -42,7 +42,7 @@ font = {'family' : 'monospace',
         'size'   : 20,  
         }  
 
-font_size = 16
+font_size = 20
 
 
 def make_patch_spines_invisible(ax):
@@ -126,9 +126,9 @@ def processplot(n):
   makersize = 0.01
 #    plt.subplot()
   #normalize = matplotlib.colors.Normalize(vmin=0, vmax=20, clip=True)
-  pt3d=ax.scatter(grid_x, grid_y, grid_z, c=color_index, s=makersize*2, cmap='nipy_spectral', edgecolors='face', alpha=1.0)
+  pt3d=ax.scatter(grid_x, grid_y, grid_z, c=color_index, s=makersize*10, cmap='nipy_spectral', edgecolors='face', alpha=1.0)
 
-  cbar=plt.colorbar(pt3d, ticks=np.linspace(np.min(color_index), np.max(color_index), 5) ,pad=0.01)
+  cbar=plt.colorbar(pt3d, ticks=np.linspace(np.min(color_index), np.max(color_index), 5) ,pad=0.05)
   cbar.ax.set_yticklabels(cbar.ax.get_yticklabels(), fontsize=20)
   cbar.set_label(r'$E_k$'+' [MeV]',fontdict=font)
   cbar.set_clim(0,500)
@@ -137,34 +137,43 @@ def processplot(n):
 #plt.plot(np.linspace(-500,900,1001), np.linspace(-500,900,1001),'-g',linewidth=3)
 #plt.plot(np.linspace(-500,900,1001), 200-np.linspace(-500,900,1001),'-',color='grey',linewidth=3)
  #   plt.legend(loc='upper right')
-  ax.set_xlim([0,55])
-  ax.set_ylim([-20.,20])
-  ax.set_zlim([-20.,20])
-  ax.set_xlabel('X [$\mu m$]',fontdict=font)
-  ax.set_ylabel('Y [$\mu m$]',fontdict=font)
-  ax.set_zlabel('Z [$\mu m$]',fontdict=font)
+  ax.set_xlim([10,50])
+  ax.set_ylim([-12.,12])
+  ax.set_zlim([-12.,12])
+  ax.set_xlabel('\n\nX [$\mu m$]',fontdict=font)
+  ax.set_ylabel('\n\nY [$\mu m$]',fontdict=font)
+  ax.set_zlabel('\n\nZ [$\mu m$]',fontdict=font)
   for t in ax.xaxis.get_major_ticks(): t.label.set_fontsize(font_size)
   for t in ax.yaxis.get_major_ticks(): t.label.set_fontsize(font_size)
   for t in ax.zaxis.get_major_ticks(): t.label.set_fontsize(font_size)
 
   ax.grid(linestyle='--', linewidth='0.5', color='grey')
+  #ax.grid()
   ax.view_init(elev=45, azim=-45)
 
-  ax.scatter(grid_x,grid_z,c=color_index,s=makersize*0.5, alpha=0.5,zdir='y',zs=20,cmap='nipy_spectral')
-  ax.scatter(grid_x,grid_y,c=color_index,s=makersize*0.5, alpha=0.5,zdir='z',zs=-20,cmap='nipy_spectral')
-  ax.scatter(grid_y,grid_z,c=color_index,s=makersize*0.5, alpha=0.5,zdir='x',zs=0,cmap='nipy_spectral')
+  ax.xaxis.pane.set_edgecolor('black')
+  ax.yaxis.pane.set_edgecolor('black')
+  ax.zaxis.pane.set_edgecolor('black')
+  # Set the background color of the pane YZ
+  ax.w_xaxis.set_pane_color((0.0, 0.0, 0.0, 1.0))
+  ax.w_yaxis.set_pane_color((0.0, 0.0, 0.0, 1.0))
+  ax.w_zaxis.set_pane_color((0.0, 0.0, 0.0, 1.0))
+
+  ax.scatter(grid_x,grid_z,c=color_index,s=makersize*0.5, alpha=0.5,zdir='y',zs=12,cmap='nipy_spectral')
+  ax.scatter(grid_x,grid_y,c=color_index,s=makersize*0.5, alpha=0.5,zdir='z',zs=-12,cmap='nipy_spectral')
+  ax.scatter(grid_y,grid_z,c=color_index,s=makersize*0.5, alpha=0.5,zdir='x',zs=10,cmap='nipy_spectral')
 
 
 #  plt.text(-100,650,' t = '++' fs',fontdict=font)
   plt.subplots_adjust(left=0.16, bottom=None, right=0.97, top=None,
                 wspace=None, hspace=None)
-  plt.title('At '+str(round(time1/1.0e-15,2))+' fs',fontdict=font)
+  plt.title('At '+str(round(time1/1.0e-15,2))+' fs',fontdict=font, y=1.08)
 #plt.show()
 #lt.figure(figsize=(100,100))
 
 
   fig = plt.gcf()
-  fig.set_size_inches(12, 10.5)
+  fig.set_size_inches(12, 8.5)
   fig.savefig(to_path+'proton_3d_scatter_Ek'+str(n).zfill(4)+'.png',format='png',dpi=320)
   plt.close("all")
   print('finised '+str(n).zfill(4))

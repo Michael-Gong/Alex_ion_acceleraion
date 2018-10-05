@@ -68,10 +68,10 @@ if __name__ == "__main__":
       return (en_grid, en_value)
 
 def processplot(n):
-    to_path='./uniform_a190_n60/'
-    from_path = './uniform_a190_n60/'
+    to_path='./uniform_a190_n50/'
+    from_path = './uniform_a190_n50/'
     ######### Parameter you should set ###########
-    n0=30.0
+    n0=50.0
     R=1.8e-6
     L=15e-6
     Ntot = np.pi*R*R*L*n0*denunit

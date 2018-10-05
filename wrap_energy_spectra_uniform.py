@@ -60,8 +60,8 @@ if __name__ == "__main__":
         en_value[i] = np.sum(weight[ (en_bin[i]<=gamma) & (gamma<en_bin[i+1]) ])/(1000.0/binsize)
       return (en_grid, en_value)
 
-  to_path='./uniform_a190_n15/'
-  from_path = './uniform_a190_n15/'
+  to_path='./uniform_a190_n40/'
+  from_path = './uniform_a190_n40/'
   ######### Parameter you should set ###########
   start   =  3  # start time
   stop    =  30  # end time
@@ -75,7 +75,7 @@ if __name__ == "__main__":
   #if (os.path.isdir('jpg') == False):
   #  os.mkdir('jpg')
   ######### Script code drawing figure ################
-  n0=15.0
+  n0=40.0
   R=1.8e-6
   L=15e-6
   Ntot = np.pi*R*R*L*n0*denunit
