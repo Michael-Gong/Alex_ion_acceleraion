@@ -55,9 +55,9 @@ def processplot(n):
   #youwant field  ex,ey,ez,bx,by,bz,ex_averaged,bx_averaged...
   #youwant Derived electron_density,electron_ekbar...
   #youwant dist_fn electron_x_px...
-  to_path='./uniform_a190_n50/'
-  from_path = './uniform_a190_n50/'
   
+  from_path = './'
+  to_path   = './'
   
   
   ######### Script code drawing figure ################
@@ -85,8 +85,8 @@ def processplot(n):
   print(eexx.shape)
   n_size = eexx[-1,:].size
   ex = np.sum(eexx,axis=1)/n_size
-  np.savetxt(to_path+'ex_lineout_r15_'+str(n).zfill(4)+'.txt',ex)
-  np.savetxt(to_path+'ex_lineout_x.txt',x)
+  np.savetxt('./ex_lineout_r15_'+str(n).zfill(4)+'.txt',ex)
+  np.savetxt('./ex_lineout_x.txt',x)
   print('finised '+str(round(100.0*(n-start+step)/(stop-start+step),4))+'%')
   return 0
 
@@ -96,6 +96,6 @@ if __name__ == '__main__':
   step    =  1  # the interval or step
     
   inputs = range(start,stop+step,step)
-  pool = mp.Pool(processes=5)
+  pool = mp.Pool(processes=10)
   results = pool.map(processplot,inputs)
   print(results)

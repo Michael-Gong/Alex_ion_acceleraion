@@ -12,6 +12,7 @@ import matplotlib.colors as mcolors
 import scipy.ndimage as ndimage
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 import matplotlib.gridspec as gridspec
+from mpl_toolkits.mplot3d import Axes3D
 
 import multiprocessing as mp
 
@@ -41,6 +42,9 @@ font = {'family' : 'monospace',
         'size'   : 20,  
         }  
 
+font_size = 16
+
+
 def make_patch_spines_invisible(ax):
     ax.set_frame_on(True)
     ax.patch.set_visible(False)
@@ -48,10 +52,8 @@ def make_patch_spines_invisible(ax):
         sp.set_visible(False)
 
 def processplot(n): 
-  
-  from_path = './'
-  to_path   = './'
-  
+  from_path='./'  
+  to_path='./'  
   data = sdf.read(from_path+"i_tot_loc0027.sdf",dict=True)
   #grid_x = data['Grid/Particles/subset_high_e/electron'].data[0]/wavelength
   px = data['Particles/Px/subset_Only_Ions0/Ion'].data/(1836*m0*v0)
@@ -61,11 +63,15 @@ def processplot(n):
   gg = (px**2+py**2+pz**2+1)**0.5
   Ek = (gg-1)*1836*0.51
 
-  part13_id = data['Particles/ID/subset_Only_Ions0/Ion'].data
-  part13_id = part13_id[ (Ek>225) & (abs(theta)<10) & (Ek<245)]
+  part_id = data['Particles/ID/subset_Only_Ions0/Ion'].data
+  part13_id = part_id[ (Ek>5) ]
+  part13_id_2 = part_id[ (Ek>225) & (abs(theta)<10) & (Ek<245)]
 
-  #choice = np.random.choice(range(part13_id.size), 20000, replace=False)
-  #part13_id = part13_id[choice]
+#  choice = np.random.choice(range(part13_id.size), 2000, replace=False)
+#  part13_id = part13_id[choice]
+
+  choice = np.random.choice(range(part13_id.size), 500000, replace=False)
+  part13_id = part13_id[choice]
   print('part13_id size is ',part13_id.size,' max ',np.max(part13_id),' min ',np.min(part13_id))
   
   ######### Script code drawing figure ################
@@ -85,39 +91,76 @@ def processplot(n):
   py = data['Particles/Py/subset_Only_Ions0/Ion'].data/(1836*m0*v0)
   pz = data['Particles/Pz/subset_Only_Ions0/Ion'].data/(1836*m0*v0)
   gg = (px**2+py**2+pz**2+1)**0.5
+  Ek = (gg-1)*1836*0.51
   theta = np.arctan2((py**2+pz**2)**0.5,px)*180.0/np.pi
 
   grid_x = data['Grid/Particles/subset_Only_Ions0/Ion'].data[0]/1.0e-6      
+  grid_y = data['Grid/Particles/subset_Only_Ions0/Ion'].data[1]/1.0e-6      
+  grid_z = data['Grid/Particles/subset_Only_Ions0/Ion'].data[2]/1.0e-6      
   temp_id = data['Particles/ID/subset_Only_Ions0/Ion'].data
+  grid_r =  (grid_y**2+grid_z**2)**0.5
 
-  px = px[theta < 20]
-  grid_x = grid_x[theta < 20]
-  theta = theta[theta < 20]
+  px_1 = px[np.in1d(temp_id,part13_id)]
+  grid_x_1 = grid_x[np.in1d(temp_id,part13_id)]
+  grid_y_1 = grid_y[np.in1d(temp_id,part13_id)]
+  grid_z_1 = grid_z[np.in1d(temp_id,part13_id)]
+  theta_1 = theta[np.in1d(temp_id,part13_id)]
+  grid_r_1 =  grid_r[np.in1d(temp_id,part13_id)]
+  Ek_1 = Ek[np.in1d(temp_id,part13_id)]
+ 
+  px_2 = px[np.in1d(temp_id,part13_id_2)]
+  grid_x_2 = grid_x[np.in1d(temp_id,part13_id_2)]
+  grid_y_2 = grid_y[np.in1d(temp_id,part13_id_2)]
+  grid_z_2 = grid_z[np.in1d(temp_id,part13_id_2)]
+  theta_2 = theta[np.in1d(temp_id,part13_id_2)]
+  grid_r_2 =  grid_r[np.in1d(temp_id,part13_id_2)]
+  Ek_2 = Ek[np.in1d(temp_id,part13_id_2)]
 
-  if np.size(px) == 0:
+  if np.size(px_1) == 0:
     return 0;
-  theta[theta < -20] = -20
-  theta[theta >  20] =  20
+  Ek_1[Ek_1 > 500] = 500
+  Ek_1[0] = 0.0
+  Ek_1[-1] = 500.0
+  color_index = Ek_1
+  fig = plt.figure()
+  ax = plt.axes(projection='3d')
 
-  color_index = abs(theta)
-
-  fig,host = plt.subplots()
+  makersize = 0.01
 #    plt.subplot()
-  plt.scatter(grid_x, px, c=color_index, s=0.03, cmap='rainbow_r', edgecolors='None', alpha=0.66)
-  cbar=plt.colorbar( ticks=np.linspace(np.min(color_index), np.max(color_index), 5) ,pad=0.01)
-  cbar.ax.set_yticklabels(cbar.ax.get_yticklabels(), fontsize=20)
-  cbar.set_label(r'$|\theta|$'+' [degree]',fontdict=font)
+  #normalize = matplotlib.colors.Normalize(vmin=0, vmax=20, clip=True)
+  pt3d=ax.scatter(grid_x_1, grid_y_1, grid_z_1, c=color_index, s=makersize*2, cmap='magma', edgecolors='none', alpha=1.0, marker='.')
+  pt3d_2=ax.scatter(grid_x_2, grid_y_2, grid_z_2, c='springgreen', s=makersize*8, edgecolors='none', alpha=1.0, marker='.')
 
+  cbar=plt.colorbar(pt3d, ticks=np.linspace(np.min(color_index), np.max(color_index), 5) ,pad=0.01)
+  cbar.ax.set_yticklabels(cbar.ax.get_yticklabels(), fontsize=20)
+  cbar.set_label(r'$E_k$'+' [MeV]',fontdict=font)
+  cbar.set_clim(0,500)
 #plt.plot(np.linspace(-500,900,1001), np.zeros([1001]),':k',linewidth=2.5)
 #plt.plot(np.zeros([1001]), np.linspace(-500,900,1001),':k',linewidth=2.5)
 #plt.plot(np.linspace(-500,900,1001), np.linspace(-500,900,1001),'-g',linewidth=3)
 #plt.plot(np.linspace(-500,900,1001), 200-np.linspace(-500,900,1001),'-',color='grey',linewidth=3)
  #   plt.legend(loc='upper right')
-  plt.xlim(-5,55)
-  plt.ylim(0.,1.6)
-  plt.xlabel('X [$\mu m$]',fontdict=font)
-  plt.ylabel('$p_x$ [m$_i$c$^2$]',fontdict=font)
-  plt.xticks(fontsize=20); plt.yticks(fontsize=20);
+  ax.set_xlim([0,55])
+  ax.set_ylim([-20.,20])
+  ax.set_zlim([-20.,20])
+  ax.set_xlabel('X [$\mu m$]',fontdict=font)
+  ax.set_ylabel('Y [$\mu m$]',fontdict=font)
+  ax.set_zlabel('Z [$\mu m$]',fontdict=font)
+  for t in ax.xaxis.get_major_ticks(): t.label.set_fontsize(font_size)
+  for t in ax.yaxis.get_major_ticks(): t.label.set_fontsize(font_size)
+  for t in ax.zaxis.get_major_ticks(): t.label.set_fontsize(font_size)
+
+  ax.grid(linestyle='--', linewidth='0.5', color='grey')
+  ax.view_init(elev=45, azim=-45)
+
+  ax.scatter(grid_x_1,grid_z_1,c=color_index,s=makersize*0.5, alpha=0.5,zdir='y',zs=20,cmap='magma',marker='.')
+  ax.scatter(grid_x_2,grid_z_2,c='springgreen',s=makersize*2, alpha=0.5,zdir='y',zs=20,marker='.')
+  ax.scatter(grid_x_1,grid_y_1,c=color_index,s=makersize*0.5, alpha=0.5,zdir='z',zs=-20,cmap='magma',marker='.')
+  ax.scatter(grid_x_2,grid_y_2,c='springgreen',s=makersize*2, alpha=0.5,zdir='z',zs=-20,marker='.')
+  ax.scatter(grid_y_1,grid_z_1,c=color_index,s=makersize*0.5, alpha=0.5,zdir='x',zs=0,cmap='magma',marker='.')
+  ax.scatter(grid_y_2,grid_z_2,c='springgreen',s=makersize*2, alpha=0.5,zdir='x',zs=0,marker='.')
+
+
 #  plt.text(-100,650,' t = '++' fs',fontdict=font)
   plt.subplots_adjust(left=0.16, bottom=None, right=0.97, top=None,
                 wspace=None, hspace=None)
@@ -125,58 +168,20 @@ def processplot(n):
 #plt.show()
 #lt.figure(figsize=(100,100))
 
-  par1 = host.twinx()
-  par2 = host.twinx()
-  par3 = host.twinx()
-
-  par2.spines["right"].set_position(("axes", 1.05))
-  make_patch_spines_invisible(par2)
-  par2.spines["right"].set_visible(True)
-
-  par3.spines["right"].set_position(("axes", 1.1))
-  make_patch_spines_invisible(par3)
-  par3.spines["right"].set_visible(True)
-
-  tkw = dict(size=20, width=1.)
-
-  x  = np.loadtxt('ex_lineout_x.txt')
-  ex = np.loadtxt('ex_lineout_r15_'+str(n).zfill(4)+'.txt')
-  p1, = par1.plot(x,ex, "-k", label="Ex")
-  par1.set_ylabel(r'$E_x\ [m_ec\omega/|e|]$')
-  par1.yaxis.label.set_color(p1.get_color())
-  par1.tick_params(axis='y', colors=p1.get_color(), **tkw)
-  par1.set_ylim(-10,15)
-
-  x  = np.loadtxt('eden_lineout_x.txt')
-  eden = np.loadtxt('eden_lineout_r15_'+str(n).zfill(4)+'.txt')#*exunit/denunit
-  p2, = par2.plot(x,eden, "-b", label="Electron")
-  par2.set_ylabel('$n_e\ [n_c]$')
-  par2.yaxis.label.set_color(p2.get_color())
-  par2.tick_params(axis='y', colors=p2.get_color(), **tkw)
-  par2.set_ylim(0,30)
-  
-
-  x  = np.loadtxt('iden_lineout_x.txt')
-  iden = np.loadtxt('iden_lineout_r15_'+str(n).zfill(4)+'.txt')#*exunit/denunit
-  p3, = par3.plot(x,iden, "-r", label="Ion")
-  par3.set_ylabel('$n_i\ [n_c]$')
-  par3.yaxis.label.set_color(p3.get_color())
-  par3.tick_params(axis='y', colors=p3.get_color(), **tkw)
-  par3.set_ylim(0,30)
 
   fig = plt.gcf()
-  fig.set_size_inches(12, 7.5)
-  fig.savefig(to_path+'r15_comb_proton'+str(n).zfill(4)+'.png',format='png',dpi=80)
+  fig.set_size_inches(12, 10.5)
+  fig.savefig(to_path+'new_proton_3d_scatter_Ek'+str(n).zfill(4)+'.png',format='png',dpi=320)
   plt.close("all")
   print('finised '+str(n).zfill(4))
-  return 0
+#  return 0
 
 if __name__ == '__main__':
-  start   =  3  # start time
+  start   =  1  # start time
   stop    =  31  # end time
   step    =  1  # the interval or step
     
   inputs = range(start,stop+step,step)
-  pool = mp.Pool(processes=5)
+  pool = mp.Pool(processes=10)
   results = pool.map(processplot,inputs)
   print(results)

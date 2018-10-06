@@ -52,16 +52,16 @@ if __name__ == "__main__":
 
 
   def pxpy_to_energy(gamma, weight):
-      binsize = 500
-      en_grid = np.linspace(1,999,500)
-      en_bin  = np.linspace(0,1000.0,501)
+      binsize = 300
+      en_grid = np.linspace(0.5,599.5,300)
+      en_bin  = np.linspace(0,600.0,301)
       en_value = np.zeros_like(en_grid) 
       for i in range(binsize):
-        en_value[i] = np.sum(weight[ (en_bin[i]<=gamma) & (gamma<en_bin[i+1]) ])/(1000.0/binsize)
+        en_value[i] = np.sum(weight[ (en_bin[i]<=gamma) & (gamma<en_bin[i+1]) ])/(600.0/binsize)
       return (en_grid, en_value)
 
-  to_path='./uniform_a190_n40/'
-  from_path = './uniform_a190_n40/'
+  to_path='./'
+  from_path = './'
   ######### Parameter you should set ###########
   start   =  3  # start time
   stop    =  30  # end time
@@ -75,12 +75,12 @@ if __name__ == "__main__":
   #if (os.path.isdir('jpg') == False):
   #  os.mkdir('jpg')
   ######### Script code drawing figure ################
-  n0=40.0
+  n0=30.0
   R=1.8e-6
   L=15e-6
   Ntot = np.pi*R*R*L*n0*denunit
   V=(1.0/20.0)*(1.0/15.0)*(1.0/15.0)*1.0e-18
-  weight = V*denunit*n0/20.0 
+  weight = V*denunit*n0/50.0 
 #  weight = Ntot/(1200*360*360*50)
 
   set_relativistic =1 
@@ -129,7 +129,7 @@ if __name__ == "__main__":
       plt.xticks(fontsize=20); plt.yticks(fontsize=20);
       plt.yscale('log')
       #plt.ylim(2e7,8e9)
-      plt.xlim(5,1000)
+      plt.xlim(5,600)
       plt.grid(which='major',color='k', linestyle='--', linewidth=0.3)
       plt.grid(which='minor',color='k', linestyle='--', linewidth=0.1)
 
@@ -139,6 +139,6 @@ if __name__ == "__main__":
     #        plt.text(250,6e9,'t='+str(round(time/1.0e-15,0))+' fs',fontdict=font)
       fig = plt.gcf()
       fig.set_size_inches(10.0, 6.0)
-      fig.savefig(to_path+'proton_spectrum_'+str(n).zfill(4)+'.png',format='png',dpi=80)
+      fig.savefig(to_path+'proton_spectrum_'+str(n).zfill(4)+'_'+'.png',format='png',dpi=80)
       plt.close("all")
-      print('finished!'+str(n).zfill(4))      
+      print('finished!'+str(n).zfill(4)+'_'+str(0).zfill(4))      

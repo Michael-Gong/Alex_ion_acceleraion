@@ -14,7 +14,6 @@ import os, time
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.colors as mcolors
 
-
 ######## Constant defined here ########
 pi        =     3.1415926535897932384626
 q0        =     1.602176565e-19 # C
@@ -60,34 +59,27 @@ def create_alpha(func):
     return [ 1 if func(i)>1 else 0 if func(i)<0 else func(i) for i in range(256)]
 
 
-#def processplot(n): 
-if __name__ == '__main__':
-  start   =  10 # start time
-  stop    =  30  # end time
-  step    =  2  # the interval or step
-  for n in range(start,stop+step,step):
+def processplot(n): 
     from_path='./'
     to_path='./'
     x_start=0; x_stop=1200; y_start=0; y_stop=360; z_start=0; z_stop=360;
     x_size = x_stop-x_start; y_size = y_stop-y_start; z_size = z_stop-z_start
-    name = 'Br_averaged'
+    name = 'e_density'
 
-    data = sdf.read(from_path+'b_fields'+str(n).zfill(4)+'.sdf',dict=True)
+    data = sdf.read(from_path+'q'+str(n).zfill(4)+'.sdf',dict=True)
     header=data['Header']
     time =header['time']
     x    = data['Grid/Grid_mid'].data[0]/1.e-6
     y    = data['Grid/Grid_mid'].data[1]/1.e-6
     z    = data['Grid/Grid_mid'].data[2]/1.e-6
-    var1  = data['Magnetic Field/By_averaged'].data/bxunit
-    var2  = data['Magnetic Field/Bz_averaged'].data/bxunit
-    var   = (var1**2+var2**2)**0.5
+    var  = data['Derived/Number_Density/Electron'].data/denunit
 
     X, Y, Z = np.meshgrid(x, y, z, sparse=False, indexing='ij')
     var  = var[x_start:x_stop,y_start:y_stop,z_start:z_stop]
     X    =  X[x_start:x_stop,y_start:y_stop,z_start:z_stop]
     Y    =  Y[x_start:x_stop,y_start:y_stop,z_start:z_stop]
     Z    =  Z[x_start:x_stop,y_start:y_stop,z_start:z_stop]
-
+   
     var = rebin3d(var, (x_size//4, y_size//4, z_size//4))
     X = rebin3d(X, (x_size//4, y_size//4, z_size//4))
     Y = rebin3d(Y, (x_size//4, y_size//4, z_size//4))
@@ -98,11 +90,13 @@ if __name__ == '__main__':
     Y    = Y.reshape(np.size(Y))
     Z    = Z.reshape(np.size(Z))
 
+    var[var > 30] =30
+
     plotkws = {'marker':'.','edgecolors':'none'}
     norm = None
 
     index = 3
-    _abs  = False # True is for ex; False is for density
+    _abs  = False # True is for ex; Flase is for density
     log   = False
     elev  = None
     azim  = None
@@ -113,7 +107,7 @@ if __name__ == '__main__':
         plt.set_cmap(reg_cmap_transparent('bwr',create_alpha(lambda x:abs(x/127.5-1)**index)))
     else:
         _min = np.max(var)**(0.002**(1.0/index)) if log else np.max(var)*0.002**(1.0/index)
-        plt.set_cmap(reg_cmap_transparent('nipy_spectral',create_alpha(lambda x:abs(x/255.0)**index)))
+        plt.set_cmap(reg_cmap_transparent('hsv',create_alpha(lambda x:abs(x/255.0)**index)))
 
         #special code
         _min = max(_min,1.1e27*0.8)
@@ -127,8 +121,8 @@ if __name__ == '__main__':
     #def point_scatter3D(var,elev=None,azim=None,hold=False,iso=False,norm=None,plotkws={}):
     cmap = plt.get_cmap()
     if norm is not None:
-        v0 = np.min(var) - norm
-        v1 = np.max(var) - norm
+        v0 = np.min(var.data) - norm
+        v1 = np.max(var.data) - norm
         if abs(v0/v1) > 1:
             low = 0
             high = 0.5 * (1 - v1/v0)
@@ -158,7 +152,7 @@ if __name__ == '__main__':
     #cbar=plt.colorbar(im, ticks=np.linspace(np.min(color_index), np.max(color_index), 5) ,pad=0.01)
     cbar=plt.colorbar(im, pad=0.01)
     cbar.ax.set_yticklabels(cbar.ax.get_yticklabels(), fontsize=20)
-    cbar.set_label(name+r'$[m_e\omega/|e|]$',fontdict=font)
+    cbar.set_label(name+r'$[n_c]$',fontdict=font)
     #cbar.set_clim(300,600)
 
     #print('here4')
@@ -167,64 +161,62 @@ if __name__ == '__main__':
     for t in ax.yaxis.get_major_ticks(): t.label.set_fontsize(font_size)
     for t in ax.zaxis.get_major_ticks(): t.label.set_fontsize(font_size)
 
-
-
-#    ax.scatter(X,Z,c=var, zdir='y',zs=(y_stop-y_start)/2/12, marker='.', edgecolors='none', cmap=cmap)
-#    ax.scatter(X,Y,c=var, zdir='z',zs=-(z_stop-z_start)/2/12,  marker='.', edgecolors='none', cmap=cmap)
-#    ax.scatter(Y,Z,c=var, zdir='x',zs=x_start/20-5,  marker='.', edgecolors='none', cmap=cmap)
+    #ax.scatter(X,Z,c=var,**plotkws ,zdir='y',zs=4)
+    #ax.scatter(X,Y,c=var,**plotkws, zdir='z',zs=-4)
+    #ax.scatter(Y,Z,c=var,**plotkws, zdir='x',zs=15)
 
     #plot for y_z plane
     Y,Z  = np.meshgrid(y,z,indexing='ij')
-    eexx = (var1**2+var2**2)**0.5
-    ex = (eexx[420-1,:,:]+eexx[420,:,:])/2
+    eexx = data['Derived/Number_Density/Electron'].data/denunit
+    ex = (eexx[420-1,:,:]+eexx[420,:,:])/2  # slice at 21um
     ex = ex[y_start:y_stop,z_start:z_stop]
-    eee = np.max([np.max(ex),abs(np.min(ex))])
+    eee = 30
     Y  = Y[y_start:y_stop,z_start:z_stop]
     Z  = Z[y_start:y_stop,z_start:z_stop]
     levels = np.linspace(0, eee, 40)
-    im2=ax.contourf(ex.T, Y.T, Z.T, levels=levels, norm=mcolors.Normalize(vmin=0, vmax=eee), cmap=cm.pink_r, zdir='x', offset=x_start/20-5)
+    im2=ax.contourf(ex.T, Y.T, Z.T, levels=levels, norm=mcolors.Normalize(vmin=0, vmax=eee), cmap=cm.nipy_spectral, zdir='x', offset=x_start/20-5)
 #    ax.set_xlim([x_start/20-5,x_stop/20-5])
 #    ax.set_xlim([-(y_stop-y_start)/2/12,(y_stop-y_start)/2/12])
 #    ax.set_ylim([-(z_stop-z_start)/2/12,(z_stop-z_start)/2/12])
     cbar = plt.colorbar(im2,  ticks=np.linspace(-eee, eee, 5))
     cbar.ax.set_yticklabels(cbar.ax.get_yticklabels(), fontsize=20)
-    cbar.set_label(name+r'$[m_e\omega/|e|]$',fontdict=font)
+    cbar.set_label(name+r'$[n_c]$',fontdict=font)
     
 
     #plot for x_z plane
     X,Z = np.meshgrid(x,z,indexing='ij')
-    eexx = data['Magnetic Field/By_averaged'].data/bxunit
     ex = (eexx[:,(y_start+y_stop)//2-1,:]+eexx[:,(y_start+y_stop)//2,:])/2
     ex = ex[x_start:x_stop,z_start:z_stop]
     X  = X[x_start:x_stop,z_start:z_stop]
     Z  = Z[x_start:x_stop,z_start:z_stop]
     if np.min(ex.T) == np.max(ex.T):
-         continue
-    eee = 20
-    levels = np.linspace(-eee, eee, 40)
-    ax.contourf(X.T, ex.T, Z.T, levels=levels, norm=mcolors.Normalize(vmin=-eee, vmax=eee), cmap=cm.bwr, zdir='y', offset=(y_stop-y_start)/2/12)
+         return
+         #continue
+    eee = 30
+    levels = np.linspace(0, eee, 40)
+    ax.contourf(X.T, ex.T, Z.T, levels=levels, norm=mcolors.Normalize(vmin=0, vmax=eee), cmap=cm.nipy_spectral, zdir='y', offset=(y_stop-y_start)/2/12)
 #    ax.set_xlim([x_start/20-5,x_stop/20-5])
 #    ax.set_ylim([-(y_stop-y_start)/2/12,(y_stop-y_start)/2/12])
 #    ax.set_ylim([-(z_stop-z_start)/2/12,(z_stop-z_start)/2/12])
 
     #plot for x_y plane
     X,Y = np.meshgrid(x,y,indexing='ij')
-    eexx = data['Magnetic Field/Bz_averaged'].data/bxunit
     ex = (eexx[:,:,(z_start+z_stop)//2-1]+eexx[:,:,(z_start+z_stop)//2])/2
     ex = ex[x_start:x_stop,y_start:y_stop]
     X  = X[x_start:x_stop,y_start:y_stop]
     Y  = Y[x_start:x_stop,y_start:y_stop]
     if np.min(ex.T) == np.max(ex.T):
-         continue
-    eee = 20
-    levels = np.linspace(-eee, eee, 40)
-    im2=ax.contourf(X.T, Y.T, ex.T, levels=levels, norm=mcolors.Normalize(vmin=-eee, vmax=eee), cmap=cm.bwr, zdir='z', offset=-(z_stop-z_start)/2/12)
+         return
+         #continue
+    eee = 30
+    levels = np.linspace(0, eee, 40)
+    im2=ax.contourf(X.T, Y.T, ex.T, levels=levels, norm=mcolors.Normalize(vmin=0, vmax=eee), cmap=cm.nipy_spectral, zdir='z', offset=-(z_stop-z_start)/2/12)
 #    ax.set_xlim([x_start/20-5,x_stop/20-5])
 #    ax.set_ylim([-(y_stop-y_start)/2/12,(y_stop-y_start)/2/12])
 #    ax.set_zlim([-(z_stop-z_start)/2/12,(z_stop-z_start)/2/12])
     cbar = plt.colorbar(im2,  ticks=np.linspace(-eee, eee, 5))
     cbar.ax.set_yticklabels(cbar.ax.get_yticklabels(), fontsize=20)
-    cbar.set_label(name+r'$[m_e\omega/|e|]$',fontdict=font)
+    cbar.set_label(name+r'$[n_c]$',fontdict=font)
 
     #ax.scatter(X,Z,c=var,**plotkws ,zdir='y',zs=4)
     #ax.scatter(X,Y,c=var,**plotkws, zdir='z',zs=-4)
@@ -241,7 +233,7 @@ if __name__ == '__main__':
     #ax.grid(linestyle='None', linewidth='0.5', color='white')
     plt.subplots_adjust(left=0.16, bottom=None, right=0.97, top=None,
                     wspace=None, hspace=None)
-#    plt.title('At '+str(round(time/1.0e-15,2))+' fs',fontdict=font)
+    plt.title('At '+str(round(time/1.0e-15,2))+' fs',fontdict=font)
 
 
     fig = plt.gcf()
@@ -251,12 +243,12 @@ if __name__ == '__main__':
     print('finised '+str(n).zfill(4))
     #print('here5')
 
-#if __name__ == '__main__':
-#  start   =  10 # start time
-#  stop    =  30  # end time
-#  step    =  2  # the interval or step
+if __name__ == '__main__':
+  start   =  3 # start time
+  stop    =  31  # end time
+  step    =  1  # the interval or step
     
-#  inputs = range(start,stop+step,step)
-#  pool = mp.Pool(processes=1)
-#  results = pool.map(processplot,inputs)
-#  print(results)
+  inputs = range(start,stop+step,step)
+  pool = mp.Pool(processes=5)
+  results = pool.map(processplot,inputs)
+  print(results)

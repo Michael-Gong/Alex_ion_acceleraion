@@ -12,6 +12,7 @@ import multiprocessing as mp
 import sys, getopt
 import os, time
 from mpl_toolkits.mplot3d import Axes3D
+import matplotlib.colors as mcolors
 
 ######## Constant defined here ########
 pi        =     3.1415926535897932384626
@@ -61,9 +62,9 @@ def create_alpha(func):
 def processplot(n): 
     from_path='./'
     to_path='./'
-    x_start=100; x_stop=600; y_start=120; y_stop=240; z_start=120; z_stop=240;
+    x_start=0; x_stop=1200; y_start=0; y_stop=360; z_start=0; z_stop=360;
     x_size = x_stop-x_start; y_size = y_stop-y_start; z_size = z_stop-z_start
-    name = 'Ex_averaged'
+    name = 'Ex'
 
     data = sdf.read(from_path+'e_fields'+str(n).zfill(4)+'.sdf',dict=True)
     header=data['Header']
@@ -71,7 +72,7 @@ def processplot(n):
     x    = data['Grid/Grid_mid'].data[0]/1.e-6
     y    = data['Grid/Grid_mid'].data[1]/1.e-6
     z    = data['Grid/Grid_mid'].data[2]/1.e-6
-    var  = data['Electric Field/'+name].data/exunit
+    var  = data['Electric Field/Ex_averaged'].data/exunit
 
     X, Y, Z = np.meshgrid(x, y, z, sparse=False, indexing='ij')
     var  = var[x_start:x_stop,y_start:y_stop,z_start:z_stop]
@@ -89,22 +90,25 @@ def processplot(n):
     Y    = Y.reshape(np.size(Y))
     Z    = Z.reshape(np.size(Z))
 
+    var[var < 0] =0
+    var[var > 15] = 15
+
     plotkws = {'marker':'.','edgecolors':'none'}
     norm = None
 
     index = 3
-    _abs  = True # True is for ex; Flase is for density
+    _abs  = False # True is for ex; Flase is for density
     log   = False
     elev  = None
     azim  = None
 
-    if _abs == True:
+    if _abs:
         norm = 0
         _min = max(np.max(var),np.min(var))**(0.002**(1.0/index)) if log else max(np.max(var),np.min(var))*0.002**(1.0/index)
         plt.set_cmap(reg_cmap_transparent('bwr',create_alpha(lambda x:abs(x/127.5-1)**index)))
     else:
         _min = np.max(var)**(0.002**(1.0/index)) if log else np.max(var)*0.002**(1.0/index)
-        plt.set_cmap(reg_cmap_transparent('plasma_r',create_alpha(lambda x:abs(x/255.0)**index)))
+        plt.set_cmap(reg_cmap_transparent('hsv',create_alpha(lambda x:abs(x/255.0)**index)))
 
         #special code
         _min = max(_min,1.1e27*0.8)
@@ -130,26 +134,15 @@ def processplot(n):
         cmap = plt.cm.colors.LinearSegmentedColormap.from_list('tr',
                 cmap(np.linspace(low,high,256)))
 
-#    print('here1')
     fig = plt.figure()
     ax  = plt.axes(projection='3d')
     ax.view_init(elev=elev, azim=azim)
-#    print('here2')
-    im = ax.scatter(X, Y, Z, c=var, cmap=cmap, **plotkws)
-#    print('here3')
-    ax.set_xlabel('X'+ '[$\mu m$]')
-    ax.set_ylabel('y'+ '[$\mu m$]')
-    ax.set_zlabel('Z'+ '[$\mu m$]')
-
-    ax.set_xlim([x_start/20-5,x_stop/20-5])
-    ax.set_ylim([-(y_stop-y_start)/2/12,(y_stop-y_start)/2/12])
-    ax.set_zlim([-(z_stop-z_start)/2/12,(z_stop-z_start)/2/12])
-
+    im = ax.scatter(X, Y, Z, c=var, cmap=cmap, **plotkws) # norm=mcolors.Normalize(vmin=0, vmax=10))
     
     #cbar=plt.colorbar(im, ticks=np.linspace(np.min(color_index), np.max(color_index), 5) ,pad=0.01)
     cbar=plt.colorbar(im, pad=0.01)
     cbar.ax.set_yticklabels(cbar.ax.get_yticklabels(), fontsize=20)
-    cbar.set_label(name+r'$[m_ec\omega/|e|]$',fontdict=font)
+    cbar.set_label('$E_x$'+r'$[m_ec\omega/|e|]$',fontdict=font)
     #cbar.set_clim(300,600)
 
     #print('here4')
@@ -158,29 +151,109 @@ def processplot(n):
     for t in ax.yaxis.get_major_ticks(): t.label.set_fontsize(font_size)
     for t in ax.zaxis.get_major_ticks(): t.label.set_fontsize(font_size)
 
-    ax.scatter(X,Z,c=var, zdir='y',zs=(y_stop-y_start)/2/12)
-    ax.scatter(X,Y,c=var, zdir='z',zs=-(z_stop-z_start)/2/12)
-    ax.scatter(Y,Z,c=var, zdir='x',zs=x_start/20-5)
+    #ax.scatter(X,Z,c=var,**plotkws ,zdir='y',zs=4)
+    #ax.scatter(X,Y,c=var,**plotkws, zdir='z',zs=-4)
+    #ax.scatter(Y,Z,c=var,**plotkws, zdir='x',zs=15)
 
+    #plot for y_z plane
+    Y,Z  = np.meshgrid(y,z,indexing='ij')
+    eexx  = data['Electric Field/Ex_averaged'].data/exunit
+    ex = (eexx[420-1,:,:]+eexx[420,:,:])/2  # slice at 21um
+    ex = ex[y_start:y_stop,z_start:z_stop]
+    ex[ex<0] = 0
+    ex[ex>15] =15
+    eee = 15
+    Y  = Y[y_start:y_stop,z_start:z_stop]
+    Z  = Z[y_start:y_stop,z_start:z_stop]
+    levels = np.linspace(0, eee, 40)
+    im2=ax.contourf(ex.T, Y.T, Z.T, levels=levels, norm=mcolors.Normalize(vmin=0, vmax=eee), cmap=cm.nipy_spectral, zdir='x', offset=x_start/20-5)
+    cbar = plt.colorbar(im2,  ticks=np.linspace(-eee, eee, 5))
+    cbar.ax.set_yticklabels(cbar.ax.get_yticklabels(), fontsize=20)
+    cbar.set_label('$E_x$'+r'$[m_ec\omega/|e|]$',fontdict=font)
 
-    ax.grid(linestyle='--', linewidth='0.5', color='grey')
+    #plot for x_z plane
+    X,Z = np.meshgrid(x,z,indexing='ij')
+    eexx  = data['Electric Field/Ex_averaged'].data/exunit
+    ex = (eexx[:,(y_start+y_stop)//2-1,:]+eexx[:,(y_start+y_stop)//2,:])/2
+    ex = ex[x_start:x_stop,z_start:z_stop]
+    ex[ex<0] = 0
+    ex[ex>15] =15
+    X  = X[x_start:x_stop,z_start:z_stop]
+    Z  = Z[x_start:x_stop,z_start:z_stop]
+    if np.min(ex.T) == np.max(ex.T):
+         return
+         #continue
+    eee = 15
+    levels = np.linspace(0, eee, 40)
+    ax.contourf(X.T, ex.T, Z.T, levels=levels, norm=mcolors.Normalize(vmin=0, vmax=eee), cmap=cm.nipy_spectral, zdir='y', offset=(y_stop-y_start)/2/15)
+
+    #plot for x_y plane
+    X,Y = np.meshgrid(x,y,indexing='ij')
+    eexx  = data['Electric Field/Ex_averaged'].data/exunit
+    ex = (eexx[:,:,(z_start+z_stop)//2-1]+eexx[:,:,(z_start+z_stop)//2])/2
+    ex = ex[x_start:x_stop,y_start:y_stop]
+    ex[ex<0] = 0
+    ex[ex>15] =15
+    X  = X[x_start:x_stop,y_start:y_stop]
+    Y  = Y[x_start:x_stop,y_start:y_stop]
+    if np.min(ex.T) == np.max(ex.T):
+         return
+         #continue
+    eee = 15
+    levels = np.linspace(0, eee, 40)
+    im2=ax.contourf(X.T, Y.T, ex.T, levels=levels, norm=mcolors.Normalize(vmin=0, vmax=eee), cmap=cm.nipy_spectral, zdir='z', offset=-(z_stop-z_start)/2/15)
+
+#    cbar = plt.colorbar(im2,  ticks=np.linspace(-eee, eee, 5))
+#    cbar.ax.set_yticklabels(cbar.ax.get_yticklabels(), fontsize=20)
+#    cbar.set_label('$E_x$'+r'$[m_ec\omega/|e|]$',fontdict=font)
+
+    ax.set_xlim3d(x_start/20-5,x_stop/20-5)
+    ax.set_ylim3d(-(y_stop-y_start)/2/15,(y_stop-y_start)/2/15)
+    ax.set_zlim3d(-(z_stop-z_start)/2/15,(z_stop-z_start)/2/15)
+    ax.set_xlabel('\n\nX'+ '[$\mu m$]',fontsize=20)
+    ax.set_ylabel('\n\ny'+ '[$\mu m$]',fontsize=20)
+    ax.set_zlabel('\n\nZ'+ '[$\mu m$]',fontsize=20)
+
+    ax.yaxis._axinfo['label']['space_factor'] = 2.0
+
+    ax.set_zticks([-10, -5, 0, 5, 10])
+    ax.set_yticks([-10, -5, 0, 5, 10])
+    ax.set_xticks([ 0, 10, 20, 30, 40, 50])
+
+    # change fontsize
+    for t in ax.xaxis.get_major_ticks(): t.label.set_fontsize(20)
+    for t in ax.yaxis.get_major_ticks(): t.label.set_fontsize(20)
+    for t in ax.zaxis.get_major_ticks(): t.label.set_fontsize(20)
+
+    plt.show()
+    ax.grid(False)
+    ax.xaxis.pane.set_edgecolor('black')
+    ax.yaxis.pane.set_edgecolor('black')
+    ax.zaxis.pane.set_edgecolor('black')
+    # Set the background color of the pane YZ
+    ax.w_xaxis.set_pane_color((0.0, 0.0, 0.0, 1.0))
+    ax.w_yaxis.set_pane_color((0.0, 0.0, 0.0, 1.0))
+    ax.w_zaxis.set_pane_color((0.0, 0.0, 0.0, 1.0))
+    #ax.xaxis.pane.fill = False
+    #ax.yaxis.pane.fill = False
+    #ax.zaxis.pane.fill = False
+    #ax.grid(linestyle='None', linewidth='0.5', color='white')
     plt.subplots_adjust(left=0.16, bottom=None, right=0.97, top=None,
                     wspace=None, hspace=None)
-    plt.title('At '+str(round(time/1.0e-15,2))+' fs',fontdict=font)
+    plt.title(str(round(time/1.0e-15,2))+' fs',fontdict=font)
 
 
     fig = plt.gcf()
-    fig.set_size_inches(12, 10.5)
+    fig.set_size_inches(18, 10.5)
     fig.savefig(to_path+'3d_'+name+str(n).zfill(4)+'.png',format='png',dpi=320)
     plt.close("all")
     print('finised '+str(n).zfill(4))
-    return 0
     #print('here5')
 
 if __name__ == '__main__':
   start   =  3 # start time
   stop    =  31  # end time
-  step    =  1  # the interval or step
+  step    =  2  # the interval or step
     
   inputs = range(start,stop+step,step)
   pool = mp.Pool(processes=5)
