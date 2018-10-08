@@ -36,9 +36,9 @@ print('density unit nc: '+str(denunit))
 font = {'family' : 'monospace',  
         'color'  : 'black',  
         'weight' : 'normal',  
-        'size'   : 20,  
+        'size'   : 25 ,  
         }  
-font_size = 16
+font_size = 20
 
 def rebin3d(a, shape):
     sh = shape[0],a.shape[0]//shape[0],shape[1],a.shape[1]//shape[1],shape[2],a.shape[2]//shape[2]
@@ -60,15 +60,11 @@ def create_alpha(func):
     return [ 1 if func(i)>1 else 0 if func(i)<0 else func(i) for i in range(256)]
 
 
-#def processplot(n): 
-if __name__ == '__main__':
-  start   =  10 # start time
-  stop    =  30  # end time
-  step    =  2  # the interval or step
-  for n in range(start,stop+step,step):
-    from_path='./'
-    to_path='./'
-    x_start=0; x_stop=1200; y_start=0; y_stop=360; z_start=0; z_stop=360;
+def processplot(n): 
+  #for n in range(start,stop+step,step):
+    from_path='./cannon_a190/'
+    to_path='./cannon_a190/'
+    x_start=100; x_stop=700; y_start=60; y_stop=300; z_start=60; z_stop=300;
     x_size = x_stop-x_start; y_size = y_stop-y_start; z_size = z_stop-z_start
     name = 'Br_averaged'
 
@@ -88,10 +84,10 @@ if __name__ == '__main__':
     Y    =  Y[x_start:x_stop,y_start:y_stop,z_start:z_stop]
     Z    =  Z[x_start:x_stop,y_start:y_stop,z_start:z_stop]
 
-    var = rebin3d(var, (x_size//4, y_size//4, z_size//4))
-    X = rebin3d(X, (x_size//4, y_size//4, z_size//4))
-    Y = rebin3d(Y, (x_size//4, y_size//4, z_size//4))
-    Z = rebin3d(Z, (x_size//4, y_size//4, z_size//4))
+    var = rebin3d(var, (x_size//2, y_size//2, z_size//2))
+    X = rebin3d(X, (x_size//2, y_size//2, z_size//2))
+    Y = rebin3d(Y, (x_size//2, y_size//2, z_size//2))
+    Z = rebin3d(Z, (x_size//2, y_size//2, z_size//2))
 
     var  = var.reshape(np.size(var))
     X    = X.reshape(np.size(X))
@@ -101,7 +97,7 @@ if __name__ == '__main__':
     plotkws = {'marker':'.','edgecolors':'none'}
     norm = None
 
-    index = 3
+    index = 6.0
     _abs  = False # True is for ex; False is for density
     log   = False
     elev  = None
@@ -113,7 +109,7 @@ if __name__ == '__main__':
         plt.set_cmap(reg_cmap_transparent('bwr',create_alpha(lambda x:abs(x/127.5-1)**index)))
     else:
         _min = np.max(var)**(0.002**(1.0/index)) if log else np.max(var)*0.002**(1.0/index)
-        plt.set_cmap(reg_cmap_transparent('nipy_spectral',create_alpha(lambda x:abs(x/255.0)**index)))
+        plt.set_cmap(reg_cmap_transparent('hsv_r',create_alpha(lambda x:abs(x/255.0)**index)))
 
         #special code
         _min = max(_min,1.1e27*0.8)
@@ -146,13 +142,13 @@ if __name__ == '__main__':
 #    print('here2')
     im = ax.scatter(X, Y, Z, c=var, cmap=cmap, **plotkws)
 #    print('here3')
-    ax.set_xlabel('X'+ '[$\mu m$]')
-    ax.set_ylabel('y'+ '[$\mu m$]')
-    ax.set_zlabel('Z'+ '[$\mu m$]')
+    ax.set_xlabel('\n\nX'+ '[$\mu m$]',fontdict=font)
+    ax.set_ylabel('\n\nY'+ '[$\mu m$]',fontdict=font)
+    ax.set_zlabel('\n\nZ'+ '[$\mu m$]',fontdict=font)
 
     ax.set_xlim([x_start/20-5,x_stop/20-5])
-    ax.set_ylim([-(y_stop-y_start)/2/12,(y_stop-y_start)/2/12])
-    ax.set_zlim([-(z_stop-z_start)/2/12,(z_stop-z_start)/2/12])
+    ax.set_ylim([-(y_stop-y_start)/2/15-5,(y_stop-y_start)/2/15+5])
+    ax.set_zlim([-(z_stop-z_start)/2/15-5,(z_stop-z_start)/2/15+5])
 
     
     #cbar=plt.colorbar(im, ticks=np.linspace(np.min(color_index), np.max(color_index), 5) ,pad=0.01)
@@ -178,15 +174,16 @@ if __name__ == '__main__':
     eexx = (var1**2+var2**2)**0.5
     ex = (eexx[420-1,:,:]+eexx[420,:,:])/2
     ex = ex[y_start:y_stop,z_start:z_stop]
-    eee = np.max([np.max(ex),abs(np.min(ex))])
+    eee = 15#np.max([np.max(ex),abs(np.min(ex))])
+    ex[ex>eee] =eee
     Y  = Y[y_start:y_stop,z_start:z_stop]
     Z  = Z[y_start:y_stop,z_start:z_stop]
     levels = np.linspace(0, eee, 40)
-    im2=ax.contourf(ex.T, Y.T, Z.T, levels=levels, norm=mcolors.Normalize(vmin=0, vmax=eee), cmap=cm.pink_r, zdir='x', offset=x_start/20-5)
+    im2=ax.contourf(ex.T, Y.T, Z.T, levels=levels, norm=mcolors.Normalize(vmin=0, vmax=eee), cmap=cm.gray_r, zdir='x', offset=x_start/20-5)
 #    ax.set_xlim([x_start/20-5,x_stop/20-5])
 #    ax.set_xlim([-(y_stop-y_start)/2/12,(y_stop-y_start)/2/12])
 #    ax.set_ylim([-(z_stop-z_start)/2/12,(z_stop-z_start)/2/12])
-    cbar = plt.colorbar(im2,  ticks=np.linspace(-eee, eee, 5))
+    cbar = plt.colorbar(im2,  ticks=np.linspace(0, eee, 3))
     cbar.ax.set_yticklabels(cbar.ax.get_yticklabels(), fontsize=20)
     cbar.set_label(name+r'$[m_e\omega/|e|]$',fontdict=font)
     
@@ -199,10 +196,13 @@ if __name__ == '__main__':
     X  = X[x_start:x_stop,z_start:z_stop]
     Z  = Z[x_start:x_stop,z_start:z_stop]
     if np.min(ex.T) == np.max(ex.T):
-         continue
-    eee = 20
+         #continue
+         return
+    eee = 30
     levels = np.linspace(-eee, eee, 40)
-    ax.contourf(X.T, ex.T, Z.T, levels=levels, norm=mcolors.Normalize(vmin=-eee, vmax=eee), cmap=cm.bwr, zdir='y', offset=(y_stop-y_start)/2/12)
+    ex[ex>eee] = eee
+    ex[ex<-eee] = -eee
+    ax.contourf(X.T, ex.T, Z.T, levels=levels, norm=mcolors.Normalize(vmin=-eee, vmax=eee), cmap=cm.bwr, zdir='y', offset=(y_stop-y_start)/2/15+5)
 #    ax.set_xlim([x_start/20-5,x_stop/20-5])
 #    ax.set_ylim([-(y_stop-y_start)/2/12,(y_stop-y_start)/2/12])
 #    ax.set_ylim([-(z_stop-z_start)/2/12,(z_stop-z_start)/2/12])
@@ -215,16 +215,19 @@ if __name__ == '__main__':
     X  = X[x_start:x_stop,y_start:y_stop]
     Y  = Y[x_start:x_stop,y_start:y_stop]
     if np.min(ex.T) == np.max(ex.T):
-         continue
-    eee = 20
+         #continue
+         return
+    eee = 30
     levels = np.linspace(-eee, eee, 40)
-    im2=ax.contourf(X.T, Y.T, ex.T, levels=levels, norm=mcolors.Normalize(vmin=-eee, vmax=eee), cmap=cm.bwr, zdir='z', offset=-(z_stop-z_start)/2/12)
+    ex[ex>eee] = eee
+    ex[ex<-eee] = -eee
+    im2=ax.contourf(X.T, Y.T, ex.T, levels=levels, norm=mcolors.Normalize(vmin=-eee, vmax=eee), cmap=cm.bwr, zdir='z', offset=-(z_stop-z_start)/2/15-5)
 #    ax.set_xlim([x_start/20-5,x_stop/20-5])
 #    ax.set_ylim([-(y_stop-y_start)/2/12,(y_stop-y_start)/2/12])
 #    ax.set_zlim([-(z_stop-z_start)/2/12,(z_stop-z_start)/2/12])
     cbar = plt.colorbar(im2,  ticks=np.linspace(-eee, eee, 5))
     cbar.ax.set_yticklabels(cbar.ax.get_yticklabels(), fontsize=20)
-    cbar.set_label(name+r'$[m_e\omega/|e|]$',fontdict=font)
+    cbar.set_label(r'$B_\theta\ [m_e\omega/|e|]$',fontdict=font)
 
     #ax.scatter(X,Z,c=var,**plotkws ,zdir='y',zs=4)
     #ax.scatter(X,Y,c=var,**plotkws, zdir='z',zs=-4)
@@ -241,22 +244,22 @@ if __name__ == '__main__':
     #ax.grid(linestyle='None', linewidth='0.5', color='white')
     plt.subplots_adjust(left=0.16, bottom=None, right=0.97, top=None,
                     wspace=None, hspace=None)
-#    plt.title('At '+str(round(time/1.0e-15,2))+' fs',fontdict=font)
+  #  plt.title('At '+str(round(time/1.0e-15,2))+' fs',fontdict=font)
 
 
     fig = plt.gcf()
     fig.set_size_inches(20, 10.5)
-    fig.savefig(to_path+'3d_'+name+str(n).zfill(4)+'.png',format='png',dpi=320)
+    fig.savefig(to_path+'3d_'+name+str(n).zfill(4)+'.png',format='png',dpi=160)
     plt.close("all")
     print('finised '+str(n).zfill(4))
     #print('here5')
 
-#if __name__ == '__main__':
-#  start   =  10 # start time
-#  stop    =  30  # end time
-#  step    =  2  # the interval or step
+if __name__ == '__main__':
+  start   =  1 # start time
+  stop    =  31  # end time
+  step    =  1  # the interval or step
     
-#  inputs = range(start,stop+step,step)
-#  pool = mp.Pool(processes=1)
-#  results = pool.map(processplot,inputs)
-#  print(results)
+  inputs = range(start,stop+step,step)
+  pool = mp.Pool(processes=5)
+  results = pool.map(processplot,inputs)
+  print(results)

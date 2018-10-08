@@ -49,8 +49,8 @@ def make_patch_spines_invisible(ax):
 
 def processplot(n): 
   
-  from_path = './'
-  to_path   = './'
+  to_path='./cannon_a190_bulk200/'
+  from_path = './cannon_a190_bulk200/'
   
   data = sdf.read(from_path+"i_tot_loc0027.sdf",dict=True)
   #grid_x = data['Grid/Particles/subset_high_e/electron'].data[0]/wavelength
@@ -139,16 +139,16 @@ def processplot(n):
 
   tkw = dict(size=20, width=1.)
 
-  x  = np.loadtxt('ex_lineout_x.txt')
-  ex = np.loadtxt('ex_lineout_r15_'+str(n).zfill(4)+'.txt')
+  x  = np.loadtxt(from_path+'ex_lineout_x.txt')
+  ex = np.loadtxt(from_path+'ex_lineout_r15_'+str(n).zfill(4)+'.txt')
   p1, = par1.plot(x,ex, "-k", label="Ex")
   par1.set_ylabel(r'$E_x\ [m_ec\omega/|e|]$')
   par1.yaxis.label.set_color(p1.get_color())
   par1.tick_params(axis='y', colors=p1.get_color(), **tkw)
   par1.set_ylim(-10,15)
 
-  x  = np.loadtxt('eden_lineout_x.txt')
-  eden = np.loadtxt('eden_lineout_r15_'+str(n).zfill(4)+'.txt')#*exunit/denunit
+  x  = np.loadtxt(from_path+'eden_lineout_x.txt')
+  eden = np.loadtxt(from_path+'eden_lineout_r15_'+str(n).zfill(4)+'.txt')#*exunit/denunit
   p2, = par2.plot(x,eden, "-b", label="Electron")
   par2.set_ylabel('$n_e\ [n_c]$')
   par2.yaxis.label.set_color(p2.get_color())
@@ -156,8 +156,8 @@ def processplot(n):
   par2.set_ylim(0,30)
   
 
-  x  = np.loadtxt('iden_lineout_x.txt')
-  iden = np.loadtxt('iden_lineout_r15_'+str(n).zfill(4)+'.txt')#*exunit/denunit
+  x  = np.loadtxt(from_path+'iden_lineout_x.txt')
+  iden = np.loadtxt(from_path+'iden_lineout_r15_'+str(n).zfill(4)+'.txt')#*exunit/denunit
   p3, = par3.plot(x,iden, "-r", label="Ion")
   par3.set_ylabel('$n_i\ [n_c]$')
   par3.yaxis.label.set_color(p3.get_color())
@@ -174,7 +174,7 @@ def processplot(n):
 if __name__ == '__main__':
   start   =  3  # start time
   stop    =  31  # end time
-  step    =  1  # the interval or step
+  step    =  2  # the interval or step
     
   inputs = range(start,stop+step,step)
   pool = mp.Pool(processes=5)

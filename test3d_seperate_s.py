@@ -58,8 +58,8 @@ def processplot(n):
   #youwant Derived electron_density,electron_ekbar...
   #youwant dist_fn electron_x_px...
   
-  from_path = './'
-  to_path   = './'
+  from_path = './cannon_a190_bulk200/'
+  to_path   = './cannon_a190_bulk200/'
   
   
   ######### Script code drawing figure ################
@@ -86,16 +86,16 @@ def processplot(n):
               if np.min(ex.T) == np.max(ex.T):
                   continue
               eee=np.max([-np.min(ex.T),np.max(ex.T)])
-              if (name == 'ex'):
-                  eee = 50
-              elif  (name == 'ex_averaged'):
-                  eee = 30
-              elif (name == 'ey') or (name == 'bz'):
-                  eee = 380 
-              elif (name == 'ey_averaged') or (name == 'ez_averaged'):
-                  eee = 30
+              #if (name == 'ex'):
+              #    eee = 50
+              #elif  (name == 'ex_averaged'):
+              #    eee = 30
+              #elif (name == 'ey') or (name == 'bz'):
+              #    eee = 380 
+              #elif (name == 'ey_averaged') or (name == 'ez_averaged'):
+              #    eee = 30
               levels = np.linspace(-eee, eee, 40)
-              plt.contourf(X, Y, ex.T, levels=levels, norm=mcolors.Normalize(vmin=-eee, vmax=eee), cmap=cm.bwr)
+              plt.contourf(X, Y, ex.T, levels=levels, norm=mcolors.Normalize(vmin=-eee, vmax=eee), cmap=cm.jet)
               #### manifesting colorbar, changing label and axis properties ####
               cbar=plt.colorbar(ticks=[-eee, -eee/2, 0, eee/2, eee])
               cbar.set_label('Normalized electric field',fontdict=font)
@@ -121,12 +121,12 @@ def processplot(n):
               if np.min(ex.T) == np.max(ex.T):
                   continue
               eee=np.max([-np.min(ex.T),np.max(ex.T)])
-              if (name == 'ey') or (name == 'bz'):
-                  eee = 380 
-              elif (name == 'by_averaged') or (name == 'bz_averaged'):
-                  eee = 30
+              #if (name == 'ey') or (name == 'bz'):
+              #    eee = 380 
+              #elif (name == 'by_averaged') or (name == 'bz_averaged'):
+              #    eee = 30
               levels = np.linspace(-eee, eee, 40)
-              plt.contourf(X, Y, ex.T, levels=levels, norm=mcolors.Normalize(vmin=-eee, vmax=eee), cmap=cm.bwr)
+              plt.contourf(X, Y, ex.T, levels=levels, norm=mcolors.Normalize(vmin=-eee, vmax=eee), cmap=cm.jet)
               #### manifesting colorbar, changing label and axis properties ####
               cbar=plt.colorbar(ticks=[-eee, -eee/2, 0, eee/2, eee])
               cbar.set_label('Normalized magnetic field',fontdict=font)        
@@ -152,10 +152,10 @@ def processplot(n):
               if np.min(den.T) == np.max(den.T):
                   continue
               eee=np.max(den.T)
-              if (name == 'Ion_density'):
-                  eee = 200
-              elif (name == 'Electron_density'):
-                  eee = 200
+              #if (name == 'Ion_density'):
+              #    eee = 200
+              #elif (name == 'Electron_density'):
+              #    eee = 200
               levels = np.logspace(-1, np.log10(eee), 40) 
               plt.contourf(X, Y, den.T, levels=levels,norm=colors.LogNorm(vmin=0.1, vmax=eee), cmap=cm.nipy_spectral)
               #### manifesting colorbar, changing label and axis properties ####
@@ -183,10 +183,10 @@ def processplot(n):
               if np.min(den.T) == np.max(den.T):
                   continue
               eee=np.max(den.T)
-              if (name == 'Ion_ekbar_averaged'):
-                  eee = 400
-              elif name == 'Electron_ekbar_averaged':
-                  eee = 800
+              #if (name == 'Ion_ekbar_averaged'):
+              #    eee = 400
+              #elif name == 'Electron_ekbar_averaged':
+              #    eee = 800
               levels = np.logspace(-1, np.log10(eee), 40) 
               plt.contourf(X, Y, den.T, levels=levels,norm=colors.LogNorm(vmin=0.1, vmax=eee), cmap=cm.nipy_spectral)
               #### manifesting colorbar, changing label and axis properties ####

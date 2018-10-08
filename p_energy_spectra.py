@@ -68,15 +68,15 @@ if __name__ == "__main__":
       return (en_grid, en_value)
 
 def processplot(n):
-    to_path='./uniform_a190_n50/'
-    from_path = './uniform_a190_n50/'
+    to_path='./cannon_a190_bulk200/'
+    from_path = './cannon_a190_bulk200/'
     ######### Parameter you should set ###########
-    n0=50.0
+    n0=30.0
     R=1.8e-6
     L=15e-6
     Ntot = np.pi*R*R*L*n0*denunit
     V=(1.0/20.0)*(1.0/15.0)*(1.0/15.0)*1.0e-18
-    weight = V*denunit*n0/20.0 
+    weight = V*denunit*n0/50.0 
   #  weight = Ntot/(1200*360*360*50)
   
     set_relativistic =1 

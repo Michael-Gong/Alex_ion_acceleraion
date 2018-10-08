@@ -35,9 +35,9 @@ print('density unit nc: '+str(denunit))
 font = {'family' : 'monospace',  
         'color'  : 'black',  
         'weight' : 'normal',  
-        'size'   : 20,  
+        'size'   : 25,  
         }  
-font_size = 16
+font_size = 20
 
 def rebin3d(a, shape):
     sh = shape[0],a.shape[0]//shape[0],shape[1],a.shape[1]//shape[1],shape[2],a.shape[2]//shape[2]
@@ -60,11 +60,11 @@ def create_alpha(func):
 
 
 def processplot(n): 
-    from_path='./'
-    to_path='./'
-    x_start=0; x_stop=1200; y_start=0; y_stop=360; z_start=0; z_stop=360;
+    from_path='./cannon_a190/'
+    to_path='./cannon_a190/'
+    x_start=100; x_stop=700; y_start=60; y_stop=300; z_start=60; z_stop=300;
     x_size = x_stop-x_start; y_size = y_stop-y_start; z_size = z_stop-z_start
-    name = 'e_density'
+    name = 'Electron_density'
 
     data = sdf.read(from_path+'q'+str(n).zfill(4)+'.sdf',dict=True)
     header=data['Header']
@@ -80,34 +80,33 @@ def processplot(n):
     Y    =  Y[x_start:x_stop,y_start:y_stop,z_start:z_stop]
     Z    =  Z[x_start:x_stop,y_start:y_stop,z_start:z_stop]
    
-    var = rebin3d(var, (x_size//4, y_size//4, z_size//4))
-    X = rebin3d(X, (x_size//4, y_size//4, z_size//4))
-    Y = rebin3d(Y, (x_size//4, y_size//4, z_size//4))
-    Z = rebin3d(Z, (x_size//4, y_size//4, z_size//4))
+    var = rebin3d(var, (x_size//2, y_size//2, z_size//2))
+    X = rebin3d(X, (x_size//2, y_size//2, z_size//2))
+    Y = rebin3d(Y, (x_size//2, y_size//2, z_size//2))
+    Z = rebin3d(Z, (x_size//2, y_size//2, z_size//2))
 
     var  = var.reshape(np.size(var))
+    var[var > 30] =0
     X    = X.reshape(np.size(X))
     Y    = Y.reshape(np.size(Y))
     Z    = Z.reshape(np.size(Z))
 
-    var[var > 30] =30
-
     plotkws = {'marker':'.','edgecolors':'none'}
     norm = None
 
-    index = 3
+    index = 6.0
     _abs  = False # True is for ex; Flase is for density
     log   = False
     elev  = None
     azim  = None
 
-    if _abs:
+    if _abs == True:
         norm = 0
         _min = max(np.max(var),np.min(var))**(0.002**(1.0/index)) if log else max(np.max(var),np.min(var))*0.002**(1.0/index)
         plt.set_cmap(reg_cmap_transparent('bwr',create_alpha(lambda x:abs(x/127.5-1)**index)))
     else:
         _min = np.max(var)**(0.002**(1.0/index)) if log else np.max(var)*0.002**(1.0/index)
-        plt.set_cmap(reg_cmap_transparent('hsv',create_alpha(lambda x:abs(x/255.0)**index)))
+        plt.set_cmap(reg_cmap_transparent('hsv_r',create_alpha(lambda x:abs(x/255.0)**index)))
 
         #special code
         _min = max(_min,1.1e27*0.8)
@@ -121,8 +120,8 @@ def processplot(n):
     #def point_scatter3D(var,elev=None,azim=None,hold=False,iso=False,norm=None,plotkws={}):
     cmap = plt.get_cmap()
     if norm is not None:
-        v0 = np.min(var.data) - norm
-        v1 = np.max(var.data) - norm
+        v0 = np.min(var) - norm
+        v1 = np.max(var) - norm
         if abs(v0/v1) > 1:
             low = 0
             high = 0.5 * (1 - v1/v0)
@@ -140,19 +139,19 @@ def processplot(n):
 #    print('here2')
     im = ax.scatter(X, Y, Z, c=var, cmap=cmap, **plotkws)
 #    print('here3')
-    ax.set_xlabel('X'+ '[$\mu m$]')
-    ax.set_ylabel('y'+ '[$\mu m$]')
-    ax.set_zlabel('Z'+ '[$\mu m$]')
+    ax.set_xlabel('\n\nX'+ '[$\mu m$]',fontdict=font)
+    ax.set_ylabel('\n\nY'+ '[$\mu m$]',fontdict=font)
+    ax.set_zlabel('\n\nZ'+ '[$\mu m$]',fontdict=font)
 
     ax.set_xlim([x_start/20-5,x_stop/20-5])
-    ax.set_ylim([-(y_stop-y_start)/2/12,(y_stop-y_start)/2/12])
-    ax.set_zlim([-(z_stop-z_start)/2/12,(z_stop-z_start)/2/12])
+    ax.set_ylim([-(y_stop-y_start)/2/15-5,(y_stop-y_start)/2/15+5])
+    ax.set_zlim([-(z_stop-z_start)/2/15-5,(z_stop-z_start)/2/15+5])
 
     
     #cbar=plt.colorbar(im, ticks=np.linspace(np.min(color_index), np.max(color_index), 5) ,pad=0.01)
     cbar=plt.colorbar(im, pad=0.01)
     cbar.ax.set_yticklabels(cbar.ax.get_yticklabels(), fontsize=20)
-    cbar.set_label(name+r'$[n_c]$',fontdict=font)
+    cbar.set_label(r'$n_e\ [n_c]$',fontdict=font)
     #cbar.set_clim(300,600)
 
     #print('here4')
@@ -161,66 +160,63 @@ def processplot(n):
     for t in ax.yaxis.get_major_ticks(): t.label.set_fontsize(font_size)
     for t in ax.zaxis.get_major_ticks(): t.label.set_fontsize(font_size)
 
-    #ax.scatter(X,Z,c=var,**plotkws ,zdir='y',zs=4)
-    #ax.scatter(X,Y,c=var,**plotkws, zdir='z',zs=-4)
-    #ax.scatter(Y,Z,c=var,**plotkws, zdir='x',zs=15)
-
     #plot for y_z plane
     Y,Z  = np.meshgrid(y,z,indexing='ij')
-    eexx = data['Derived/Number_Density/Electron'].data/denunit
-    ex = (eexx[420-1,:,:]+eexx[420,:,:])/2  # slice at 21um
+    eexx  = data['Derived/Number_Density/Electron'].data/denunit
+    ex = (eexx[420-1,:,:]+eexx[420,:,:])/2
     ex = ex[y_start:y_stop,z_start:z_stop]
-    eee = 30
+    eee = 30 # np.max([np.max(ex),abs(np.min(ex))])
+    ex[ex>30] =30
     Y  = Y[y_start:y_stop,z_start:z_stop]
     Z  = Z[y_start:y_stop,z_start:z_stop]
     levels = np.linspace(0, eee, 40)
-    im2=ax.contourf(ex.T, Y.T, Z.T, levels=levels, norm=mcolors.Normalize(vmin=0, vmax=eee), cmap=cm.nipy_spectral, zdir='x', offset=x_start/20-5)
+    im2=ax.contourf(ex.T, Y.T, Z.T, levels=levels, norm=mcolors.Normalize(vmin=0, vmax=eee), cmap=cm.pink_r, zdir='x', offset=x_start/20-5)
 #    ax.set_xlim([x_start/20-5,x_stop/20-5])
 #    ax.set_xlim([-(y_stop-y_start)/2/12,(y_stop-y_start)/2/12])
 #    ax.set_ylim([-(z_stop-z_start)/2/12,(z_stop-z_start)/2/12])
-    cbar = plt.colorbar(im2,  ticks=np.linspace(-eee, eee, 5))
+    cbar = plt.colorbar(im2,  ticks=np.linspace(0, eee, 3))
     cbar.ax.set_yticklabels(cbar.ax.get_yticklabels(), fontsize=20)
-    cbar.set_label(name+r'$[n_c]$',fontdict=font)
+    cbar.set_label(r'$n_e\ [n_c]$',fontdict=font)
     
 
     #plot for x_z plane
     X,Z = np.meshgrid(x,z,indexing='ij')
+    eexx  = data['Derived/Number_Density/Electron'].data/denunit
     ex = (eexx[:,(y_start+y_stop)//2-1,:]+eexx[:,(y_start+y_stop)//2,:])/2
     ex = ex[x_start:x_stop,z_start:z_stop]
     X  = X[x_start:x_stop,z_start:z_stop]
     Z  = Z[x_start:x_stop,z_start:z_stop]
     if np.min(ex.T) == np.max(ex.T):
-         return
          #continue
+         return
     eee = 30
+    ex[ex>eee] = eee
     levels = np.linspace(0, eee, 40)
-    ax.contourf(X.T, ex.T, Z.T, levels=levels, norm=mcolors.Normalize(vmin=0, vmax=eee), cmap=cm.nipy_spectral, zdir='y', offset=(y_stop-y_start)/2/12)
+    ax.contourf(X.T, ex.T, Z.T, levels=levels, norm=mcolors.Normalize(vmin=0, vmax=eee), cmap=cm.pink_r, zdir='y', offset=(y_stop-y_start)/2/15+5)
 #    ax.set_xlim([x_start/20-5,x_stop/20-5])
 #    ax.set_ylim([-(y_stop-y_start)/2/12,(y_stop-y_start)/2/12])
 #    ax.set_ylim([-(z_stop-z_start)/2/12,(z_stop-z_start)/2/12])
 
     #plot for x_y plane
     X,Y = np.meshgrid(x,y,indexing='ij')
+    eexx  = data['Derived/Number_Density/Electron'].data/denunit
     ex = (eexx[:,:,(z_start+z_stop)//2-1]+eexx[:,:,(z_start+z_stop)//2])/2
     ex = ex[x_start:x_stop,y_start:y_stop]
     X  = X[x_start:x_stop,y_start:y_stop]
     Y  = Y[x_start:x_stop,y_start:y_stop]
     if np.min(ex.T) == np.max(ex.T):
-         return
          #continue
+         return
     eee = 30
+    ex[ex>eee] = eee
     levels = np.linspace(0, eee, 40)
-    im2=ax.contourf(X.T, Y.T, ex.T, levels=levels, norm=mcolors.Normalize(vmin=0, vmax=eee), cmap=cm.nipy_spectral, zdir='z', offset=-(z_stop-z_start)/2/12)
+    im2=ax.contourf(X.T, Y.T, ex.T, levels=levels, norm=mcolors.Normalize(vmin=0, vmax=eee), cmap=cm.pink_r, zdir='z', offset=-(z_stop-z_start)/2/15-5)
 #    ax.set_xlim([x_start/20-5,x_stop/20-5])
 #    ax.set_ylim([-(y_stop-y_start)/2/12,(y_stop-y_start)/2/12])
 #    ax.set_zlim([-(z_stop-z_start)/2/12,(z_stop-z_start)/2/12])
     cbar = plt.colorbar(im2,  ticks=np.linspace(-eee, eee, 5))
     cbar.ax.set_yticklabels(cbar.ax.get_yticklabels(), fontsize=20)
-    cbar.set_label(name+r'$[n_c]$',fontdict=font)
-
-    #ax.scatter(X,Z,c=var,**plotkws ,zdir='y',zs=4)
-    #ax.scatter(X,Y,c=var,**plotkws, zdir='z',zs=-4)
-    #ax.scatter(Y,Z,c=var,**plotkws, zdir='x',zs=15)
+    cbar.set_label(r'$n_e\ [n_c]$',fontdict=font)
 
     plt.show()
     ax.grid(False)
@@ -233,18 +229,19 @@ def processplot(n):
     #ax.grid(linestyle='None', linewidth='0.5', color='white')
     plt.subplots_adjust(left=0.16, bottom=None, right=0.97, top=None,
                     wspace=None, hspace=None)
-    plt.title('At '+str(round(time/1.0e-15,2))+' fs',fontdict=font)
+  #  plt.title('At '+str(round(time/1.0e-15,2))+' fs',fontdict=font)
+
 
 
     fig = plt.gcf()
     fig.set_size_inches(20, 10.5)
-    fig.savefig(to_path+'3d_'+name+str(n).zfill(4)+'.png',format='png',dpi=320)
+    fig.savefig(to_path+'3d_'+name+str(n).zfill(4)+'.png',format='png',dpi=160)
     plt.close("all")
     print('finised '+str(n).zfill(4))
     #print('here5')
 
 if __name__ == '__main__':
-  start   =  3 # start time
+  start   =  1 # start time
   stop    =  31  # end time
   step    =  1  # the interval or step
     
