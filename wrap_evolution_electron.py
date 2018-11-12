@@ -64,7 +64,7 @@ def processdata_1(n, R_limit, L_length, dir_string):
   
   eexx = data['Derived/Number_Density/'+str.capitalize(name)].data#/denunit
   eexx = eexx[:,RR[0,:,:]<R_limit]
-  eexx = eexx[abs(X[:,0,0]-(15.+L_length/2.0))<L_length,:]
+  eexx = eexx[abs(X[:,0,0]-(15.+L_length/2.0))<L_length/2.0,:]
   ex = np.sum(eexx)*30.0*np.pi*5**2*1e-18
   return(n,ex)
   print('finised '+str(round(100.0*(n-start+step)/(stop-start+step),4))+'%')
