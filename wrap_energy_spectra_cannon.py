@@ -60,8 +60,8 @@ if __name__ == "__main__":
         en_value[i] = np.sum(weight[ (en_bin[i]<=gamma) & (gamma<en_bin[i+1]) ])/(1000.0/binsize)
       return (en_grid, en_value)
 
-  to_path='./uniform_a190_n40/'
-  from_path = './uniform_a190_n40/'
+  from_path='./cannon_a190_bulk50/'
+  to_path = from_path
   ######### Parameter you should set ###########
   start   =  3  # start time
   stop    =  30  # end time
@@ -80,7 +80,7 @@ if __name__ == "__main__":
   L=15e-6
   Ntot = np.pi*R*R*L*n0*denunit
   V=(1.0/20.0)*(1.0/15.0)*(1.0/15.0)*1.0e-18
-  weight = V*denunit*n0/20.0 
+  weight = V*denunit*n0/50.0 
 #  weight = Ntot/(1200*360*360*50)
 
   set_relativistic =1 
@@ -120,8 +120,8 @@ if __name__ == "__main__":
           print('set_relativistic 0'+str(n).zfill(4))
           
     
-      plt.plot(dist_x1,den1,':b',linewidth=4, label=str(round(time1/1e-15,0))+'; total')
-      plt.plot(dist_x2,den2,':r',linewidth=4, label=str(round(time1/1e-15,0))+'; '+r'$\theta$'+'< 10$^o$')
+      plt.plot(dist_x1,den1,'-b',linewidth=4, label=str(round(time1/1e-15,0))+'; total')
+      plt.plot(dist_x2,den2,'-r',linewidth=4, label=str(round(time1/1e-15,0))+'; '+r'$\theta$'+'< 10$^o$')
     
       #### manifesting colorbar, changing label and axis properties ####
       plt.xlabel('Energy [MeV]',fontdict=font)
@@ -129,7 +129,7 @@ if __name__ == "__main__":
       plt.xticks(fontsize=20); plt.yticks(fontsize=20);
       plt.yscale('log')
       #plt.ylim(2e7,8e9)
-      plt.xlim(5,1000)
+      plt.xlim(5,600)
       plt.grid(which='major',color='k', linestyle='--', linewidth=0.3)
       plt.grid(which='minor',color='k', linestyle='--', linewidth=0.1)
 

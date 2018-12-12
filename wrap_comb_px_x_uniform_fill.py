@@ -56,8 +56,8 @@ def processplot(n):
   #youwant Derived electron_density,electron_ekbar...
   #youwant dist_fn electron_x_px...
   
-  from_path='./cannon_a190_carbon_immobile/'
-  to_path  =from_path+'figure_2d/'
+  from_path='./uniform_a190_n30/'
+  to_path  =from_path
   
   
   n0=30.0
@@ -65,7 +65,7 @@ def processplot(n):
   L=15e-6
   Ntot = np.pi*R*R*L*n0*denunit
   V=(1.0/20.0)*(1.0/15.0)*(1.0/15.0)*1.0e-18
-  weight = V*denunit*n0/50.0 
+  weight = V*denunit*n0/20.0 
   
   data = sdf.read(from_path+"i_tot_loc"+str(n).zfill(4)+".sdf",dict=True)
   header=data['Header']
@@ -114,13 +114,12 @@ def processplot(n):
 
   data_ne= data['Derived/Number_Density/Electron'].data/denunit
   data_np= data['Derived/Number_Density/Ion'].data/denunit
-  data_nc= data['Derived/Number_Density/Carbon'].data/denunit
 
 
   data_1 = sdf.read(from_path+'e_fields'+str(n).zfill(4)+".sdf",dict=True)
   data_ex= data_1['Electric Field/'+str.capitalize('ex_averaged')].data/exunit
 
-  for R_lim in range(5,45,5): 
+  for R_lim in range(10,15,5): 
       eexx = data_ex[:,RR[0,:,:]<R_lim/10.]
     #  print(eexx.shape)
       n_size = eexx[-1,:].size
@@ -136,10 +135,6 @@ def processplot(n):
       n_size = eexx[-1,:].size
       value_n_p = np.sum(eexx,axis=1)/n_size
    
-      eexx = data_nc[:,RR[0,:,:]<R_lim/10.]
-#      print(eexx.shape)
-      n_size = eexx[-1,:].size
-      value_n_c = np.sum(eexx,axis=1)/n_size
     #    plt.subplot()
     #  plt.scatter(grid_x, px, c=color_index, s=0.03, cmap='rainbow_r', edgecolors='None', alpha=0.66)
       #plt.hist2d(grid_x, px, bins=(50, 50), range=[[10,50],[0,1.5]], cmap=plt.cm.jet, weights=weight, norm=mcolors.Normalize(vmin=-2.0, vmax=2.0))
@@ -156,7 +151,7 @@ def processplot(n):
       plt.xlim(15,45)
       plt.ylim(0.,1.5)
       plt.xlabel('X [$\mu m$]',fontdict=font)
-      plt.ylabel('$p_x$ [m$_i$c]',fontdict=font)
+      plt.ylabel('$p_x$ [m$_i$c$^2$]',fontdict=font)
       plt.xticks([15,25,35,45],fontsize=25); plt.yticks([0,0.5,1.0,1.5],fontsize=25);
     #  plt.text(-100,650,' t = '++' fs',fontdict=font)
       plt.subplots_adjust(left=0.16, bottom=None, right=0.97, top=None,
@@ -184,9 +179,13 @@ def processplot(n):
       par1.set_ylim(0,5)
     
       p1, = par1.plot(x,value_n_e, "-b", label="$n_e$",linewidth=3)
+      temp_y1 = value_n_e[abs(x-29.5)<2.5]
+      temp_y2 = np.zeros_like(value_n_e)[abs(x-29.5)<2.5]     
+ 
+      par1.fill_between(x[abs(x-29.5)<2.5],temp_y1,temp_y2, where=temp_y1>=temp_y2, facecolor='blue',alpha=0.3,interpolate=True)
       par1.set_ylim(0,5)
     
-      p1, = par1.plot(x,value_n_p+value_n_c*6, "-r", label="$Z_in_i$",linewidth=3)
+      p1, = par1.plot(x,value_n_p, "-r", label="$Z_in_i$",linewidth=3)
     #  p3, = par3.plot(x,iden, "-r", label="Ion")
     #  p3, = par3.plot(x,iden, "-y", label="Ion")
     #  p3, = par3.plot(x,cden*6, "-g", label="Ion")
@@ -199,17 +198,17 @@ def processplot(n):
     
       fig = plt.gcf()
       fig.set_size_inches(12, 7.5)
-      fig.savefig(to_path+'cut_px_x_phase_'+str(n).zfill(4)+'_r'+str(R_lim).zfill(2)+'.png',format='png',dpi=160)
+      fig.savefig(to_path+'cut_px_x_phase_'+str(n).zfill(4)+'_r'+str(R_lim).zfill(2)+'_fill.png',format='png',dpi=160)
       plt.close("all")
       print('finised cut_px_x_phase_'+str(n).zfill(4)+'_r'+str(R_lim).zfill(2)+'.png')
   return 0
 
 if __name__ == '__main__':
-  start   =  1 # start time
-  stop    =  31  # end time
+  start   =  23 # start time
+  stop    =  23  # end time
   step    =  1  # the interval or step
     
   inputs = range(start,stop+step,step)
-  pool = mp.Pool(processes=3)
+  pool = mp.Pool(processes=1)
   results = pool.map(processplot,inputs)
   print(results)

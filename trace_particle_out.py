@@ -35,9 +35,9 @@ font = {'family' : 'monospace',
         'size'   : 20,  
        }  
 
-from_path = './cannon_a190_e_div_2/'
+from_path = './cannon_a190_e_div/'
 
-data = sdf.read(from_path+"new_loc0032.sdf",dict=True)
+data = sdf.read(from_path+"new_loc0023.sdf",dict=True)
 header=data['Header']
 time1=header['time']
 grid_x = data['Grid/Particles/subset_New_particles/E_out_1'].data[0]/1.0e-6      
@@ -69,12 +69,12 @@ print('part13_id size is ',part13_id.size,' max ',np.max(part13_id),' min ',np.m
 #part_id = np.intersect1d(part_id,part13_id)
 #print('After intersecting with 0023.sdf')
 #print('Particle_ID size is ',part_id.size,' max ',np.max(part_id),' min ',np.min(part_id))
-part_id = part13_id#[::50]
+part_id = part13_id
 
 ######### Parameter you should set ###########
-start   =  28  # start time
-stop    =  36  # end time
-step    =  2  # the interval or step
+start   =  0  # start time
+stop    =  24  # end time
+step    =  1  # the interval or step
 
 px_2d = np.zeros([part_id.size,(stop-start)/step+1])
 py_2d = np.zeros([part_id.size,(stop-start)/step+1])
@@ -82,7 +82,6 @@ pz_2d = np.zeros([part_id.size,(stop-start)/step+1])
 xx_2d = np.zeros([part_id.size,(stop-start)/step+1])
 yy_2d = np.zeros([part_id.size,(stop-start)/step+1])
 zz_2d = np.zeros([part_id.size,(stop-start)/step+1])
-ww_2d = np.zeros([part_id.size,(stop-start)/step+1])
 for n in range(start,stop+step,step):
     #### header data ####
     data = sdf.read(from_path+"new_loc"+str(n).zfill(4)+".sdf",dict=True)
@@ -94,7 +93,6 @@ for n in range(start,stop+step,step):
     px     = data['Particles/Px/subset_New_particles/E_out_1'].data/(m0*v0)
     py     = data['Particles/Py/subset_New_particles/E_out_1'].data/(m0*v0)
     pz     = data['Particles/Pz/subset_New_particles/E_out_1'].data/(m0*v0)
-    ww     = data['Particles/Weight/subset_New_particles/E_out_1'].data
     temp_id = data['Particles/ID/subset_New_particles/E_out_1'].data
 
     px = px[np.in1d(temp_id,part_id)]
@@ -103,7 +101,6 @@ for n in range(start,stop+step,step):
     grid_x = grid_x[np.in1d(temp_id,part_id)]
     grid_y = grid_y[np.in1d(temp_id,part_id)]
     grid_z = grid_z[np.in1d(temp_id,part_id)]
-    ww     = ww[np.in1d(temp_id,part_id)]
     temp_id = temp_id[np.in1d(temp_id,part_id)]
 
     for ie in range(part_id.size):
@@ -113,16 +110,14 @@ for n in range(start,stop+step,step):
         xx_2d[ie,(n-start)/step] = grid_x[temp_id==part_id[ie]]
         yy_2d[ie,(n-start)/step] = grid_y[temp_id==part_id[ie]]
         zz_2d[ie,(n-start)/step] = grid_z[temp_id==part_id[ie]]
-        ww_2d[ie,(n-start)/step] = ww[temp_id==part_id[ie]]
     print('finised '+str(round(100.0*(n-start+step)/(stop-start+step),4))+'%')
-from_path = './cannon_a190_e_div_2/5_'
+from_path='./'
 np.savetxt(from_path+'px3d_out.txt',px_2d)
 np.savetxt(from_path+'py3d_out.txt',py_2d)
 np.savetxt(from_path+'pz3d_out.txt',py_2d)
 np.savetxt(from_path+'xx3d_out.txt',xx_2d)
 np.savetxt(from_path+'yy3d_out.txt',yy_2d)
 np.savetxt(from_path+'zz3d_out.txt',zz_2d)
-np.savetxt(from_path+'ww3d_out.txt',ww_2d)
 
 
 

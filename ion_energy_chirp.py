@@ -53,8 +53,8 @@ if __name__ == '__main__':
   step    =  1  # the interval or step
     
   
-  from_path = './'
-  to_path   = './'
+  from_path = './cannon_a190/'
+  to_path   = './cannon_a190/'
   
   data = sdf.read(from_path+"i_tot_loc0027.sdf",dict=True)
   #grid_x = data['Grid/Particles/subset_high_e/electron'].data[0]/wavelength
@@ -74,8 +74,13 @@ if __name__ == '__main__':
   fig, ax1 = plt.subplots()
   serial_color = ['red','gold','lawngreen','lightskyblue','darkviolet']
   serial_n = [27,23,19,15,11]
-  serial_range = np.array([ [34,42], [28,34], [21,26], [16,21], [12,17] ])
+  serial_range = np.array([ [34,42], [28,34], [21,26], [16,20], [13,17] ])
   ax2 = ax1.twinx()
+
+  serial_color = ['red']*10+['gold']*10+['lawngreen']*10+['lightskyblue']*10+['darkviolet']*10
+  cmap=matplotlib.colors.ListedColormap(serial_color)
+  norm = matplotlib.colors.Normalize(vmin=180, vmax=380)
+
   for i in range(5):
       data = sdf.read(from_path+"i_tot_loc"+str(serial_n[i]).zfill(4)+".sdf",dict=True)
       header=data['Header']
@@ -86,10 +91,13 @@ if __name__ == '__main__':
      
       px = px[np.in1d(temp_id,part13_id)]
       grid_x = grid_x[np.in1d(temp_id,part13_id)]
-      ax1.scatter(grid_x, px, c=serial_color[i], s=0.03, edgecolors='None', alpha=0.66)
 
-      x  = np.loadtxt('ex_lineout_x.txt')
-      ex = np.loadtxt('ex_lineout_r15_'+str(serial_n[i]).zfill(4)+'.txt')
+      time_c = np.zeros_like(grid_x) + time1
+
+      img = ax1.scatter(grid_x, px, c=time_c, norm=norm, cmap=cmap, s=0.03, edgecolors='None', alpha=0.66)
+
+      x  = np.loadtxt(from_path+'ex_lineout_x.txt')
+      ex = np.loadtxt(from_path+'ex_lineout_r15_'+str(serial_n[i]).zfill(4)+'.txt')
       ex = ex[ (x>= serial_range[i][0]) & (x<=serial_range[i][1])] 
       x = x[ (x>= serial_range[i][0]) & (x<=serial_range[i][1])] 
       ax2.plot(x,ex, '--', linewidth=3, color=serial_color[i], label="Ex")
@@ -99,12 +107,18 @@ if __name__ == '__main__':
 #plt.plot(np.linspace(-500,900,1001), np.linspace(-500,900,1001),'-g',linewidth=3)
 #plt.plot(np.linspace(-500,900,1001), 200-np.linspace(-500,900,1001),'-',color='grey',linewidth=3)
  #   plt.legend(loc='upper right')
+  cax = fig.add_axes([0.6,0.35,0.75,0.02])
+  cbar = fig.colorbar(img,cax=cax,label='time [fs]', ticks=[200,240,280,320,360], orientation='horizontal')
+  cbar.set_label('time [fs]',fontdict=font2)
+  cbar.ax.set_xticklabels(cbar.ax.get_xticklabels(),fontsize=15)
+
   ax1.set_xlim(10,50)
   ax1.set_ylim(0.,1.)
   ax1.set_xlabel('X [$\mu m$]',fontdict=font)
   ax1.set_ylabel('$p_x$ [m$_i$c$^2$]',fontdict=font)
   ax1.tick_params(axis='x',labelsize=20)
   ax1.tick_params(axis='y',labelsize=20)
+  ax1.grid(linestyle='--', linewidth='0.4', color='grey')
 
   ax2.set_ylim(0.,25)
   ax2.set_ylabel('$E_x$ [$m_ec\omega/|e|$]',fontdict=font,color='r')

@@ -42,7 +42,10 @@ font = {'family' : 'monospace',
         }  
 
 
-def processplot(n): 
+if __name__ == '__main__':
+  start   =  1 # start time
+  stop    =  31  # end time
+  step    =  1  # the interval or step
   ######### Parameter you should set ###########
   #start   =  23  # start time
   #stop    =  30  # end time
@@ -58,44 +61,43 @@ def processplot(n):
   
   to_path='./cannon_a190/'
   from_path = to_path
-  
-  
+ 
+  e_number = np.zeros(stop-start+step)
+  e_series = np.zeros(stop-start+step)
+  e_time   = np.zeros(stop-start+step)
   ######### Script code drawing figure ################
-  #for n in range(start,stop+step,step):
-  #### header data ####
-  #data = sdf.read(from_path+str(n).zfill(4)+".sdf",dict=True)
-  #header=data['Header']
-  #time=header['time']
-  #x  = data['Grid/Grid_mid'].data[0]/1.0e-6
-  #y  = data['Grid/Grid_mid'].data[1]/1.0e-6
-  #X, Y = np.meshgrid(x, y)
-  name = 'Electron'
-  data = sdf.read(from_path+'q'+str(n).zfill(4)+".sdf",dict=True)
-  header=data['Header']
-  time=header['time']
-  x  = data['Grid/Grid_mid'].data[0]/1.0e-6
-  y  = data['Grid/Grid_mid'].data[1]/1.0e-6
-  z  = data['Grid/Grid_mid'].data[2]/1.0e-6
-
-  X,Y,Z = np.meshgrid(x, y, z, sparse=False, indexing='ij')
-  RR = (Y**2+Z**2)**0.5
-  for R_lim in range(5,45,5): 
-      eexx = data['Derived/Number_Density/'+str.capitalize(name)].data/denunit
-      eexx = eexx[:,RR[0,:,:]<R_lim/10.]
-      print(eexx.shape)
-      n_size = eexx[-1,:].size
-      ex = np.sum(eexx,axis=1)/n_size
-      np.savetxt(to_path+'eden_lineout_r'+str(R_lim).zfill(2)+'_'+str(n).zfill(4)+'.txt',ex)
-      np.savetxt(to_path+'eden_lineout_x'+str(R_lim).zfill(2)+'.txt',x)
-  print('finised '+str(round(100.0*(n-start+step)/(stop-start+step),4))+'%')
-  return 0
-
-if __name__ == '__main__':
-  start   =  1 # start time
-  stop    =  31  # end time
-  step    =  1  # the interval or step
+  for n in range(start,stop+step,step):
+    #### header data ####
+    #data = sdf.read(from_path+str(n).zfill(4)+".sdf",dict=True)
+    #header=data['Header']
+    #time=header['time']
+    #x  = data['Grid/Grid_mid'].data[0]/1.0e-6
+    #y  = data['Grid/Grid_mid'].data[1]/1.0e-6
+    #X, Y = np.meshgrid(x, y)
+    name = 'Electron'
+    data = sdf.read(from_path+'q'+str(n).zfill(4)+".sdf",dict=True)
+    header=data['Header']
+    time=header['time']
+    x  = data['Grid/Grid_mid'].data[0]/1.0e-6
+    y  = data['Grid/Grid_mid'].data[1]/1.0e-6
+    z  = data['Grid/Grid_mid'].data[2]/1.0e-6
+  
+    X,Y,Z = np.meshgrid(x, y, z, sparse=False, indexing='ij')
+    RR = (Y**2+Z**2)**0.5
     
-  inputs = range(start,stop+step,step)
-  pool = mp.Pool(processes=8)
-  results = pool.map(processplot,inputs)
-  print(results)
+    eexx = data['Derived/Number_Density/'+str.capitalize(name)].data#/denunit
+    print(eexx.shape)
+    eexx = eexx[:,RR[0,:,:]<5.0]
+    print(eexx.shape)
+    eexx = eexx[abs(X[:,0,0]-30)<15.0,:]
+    print(eexx.shape)
+    ex = np.sum(eexx)*30.0*np.pi*5**2*1e-18
+    e_number[n-start] = ex
+    e_series[n-start] = n
+    e_time[n-start]   = time
+    print('finised '+str(round(100.0*(n-start+step)/(stop-start+step),4))+'%')
+  np.savetxt(to_path+'eden_volume_box.txt',e_number)
+  np.savetxt(to_path+'eden_volume_box_time.txt',e_time)
+  np.savetxt(to_path+'eden_volume_box_n.txt',e_series)
+
+    

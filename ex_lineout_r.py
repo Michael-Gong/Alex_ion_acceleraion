@@ -55,8 +55,8 @@ def processplot(n):
   #youwant field  ex,ey,ez,bx,by,bz,ex_averaged,bx_averaged...
   #youwant Derived electron_density,electron_ekbar...
   #youwant dist_fn electron_x_px...
-  to_path='./cannon_a190_bulk200/'
-  from_path = './cannon_a190_bulk200/'
+  to_path='./cannon_a190/'
+  from_path = to_path
   
   
   
@@ -81,12 +81,12 @@ def processplot(n):
   RR = (Y**2+Z**2)**0.5
   
   eexx = data['Electric Field/'+str.capitalize(name)].data/exunit
-  eexx = eexx[:,RR[0,:,:]<1.5]
+  eexx = eexx[:,RR[0,:,:]<4.0]
   print(eexx.shape)
   n_size = eexx[-1,:].size
   ex = np.sum(eexx,axis=1)/n_size
-  np.savetxt(to_path+'ex_lineout_r15_'+str(n).zfill(4)+'.txt',ex)
-  np.savetxt(to_path+'ex_lineout_x.txt',x)
+  np.savetxt(to_path+'ex_lineout_r40_'+str(n).zfill(4)+'.txt',ex)
+  np.savetxt(to_path+'ex_lineout_x40.txt',x)
   print('finised '+str(round(100.0*(n-start+step)/(stop-start+step),4))+'%')
   return 0
 

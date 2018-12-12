@@ -60,8 +60,8 @@ def create_alpha(func):
 
 
 def processplot(n): 
-    from_path='./cannon_a190/'
-    to_path='./cannon_a190/'
+    from_path='./uniform_a190_n30/'
+    to_path='./uniform_a190_n30/'
     x_start=100; x_stop=700; y_start=60; y_stop=300; z_start=60; z_stop=300;
     x_size = x_stop-x_start; y_size = y_stop-y_start; z_size = z_stop-z_start
     name = 'Electron_density'

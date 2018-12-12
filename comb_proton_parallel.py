@@ -49,34 +49,9 @@ def make_patch_spines_invisible(ax):
 
 def processplot(n): 
   
-  to_path='./cannon_a190_bulk200/'
-  from_path = './cannon_a190_bulk200/'
+  from_path = './cannon_a190/'
+  to_path   = from_path
   
-  data = sdf.read(from_path+"i_tot_loc0027.sdf",dict=True)
-  #grid_x = data['Grid/Particles/subset_high_e/electron'].data[0]/wavelength
-  px = data['Particles/Px/subset_Only_Ions0/Ion'].data/(1836*m0*v0)
-  py = data['Particles/Py/subset_Only_Ions0/Ion'].data/(1836*m0*v0)
-  pz = data['Particles/Pz/subset_Only_Ions0/Ion'].data/(1836*m0*v0)
-  theta = np.arctan2((py**2+pz**2)**0.5,px)*180.0/np.pi
-  gg = (px**2+py**2+pz**2+1)**0.5
-  Ek = (gg-1)*1836*0.51
-
-  part13_id = data['Particles/ID/subset_Only_Ions0/Ion'].data
-  part13_id = part13_id[ (Ek>225) & (abs(theta)<10) & (Ek<245)]
-
-  #choice = np.random.choice(range(part13_id.size), 20000, replace=False)
-  #part13_id = part13_id[choice]
-  print('part13_id size is ',part13_id.size,' max ',np.max(part13_id),' min ',np.min(part13_id))
-  
-  ######### Script code drawing figure ################
-  #for n in range(start,stop+step,step):
-  #### header data ####
-  #data = sdf.read(from_path+str(n).zfill(4)+".sdf",dict=True)
-  #header=data['Header']
-  #time=header['time']
-  #x  = data['Grid/Grid_mid'].data[0]/1.0e-6
-  #y  = data['Grid/Grid_mid'].data[1]/1.0e-6
-  #X, Y = np.meshgrid(x, y)
   
   data = sdf.read(from_path+"i_tot_loc"+str(n).zfill(4)+".sdf",dict=True)
   header=data['Header']
@@ -90,14 +65,14 @@ def processplot(n):
   grid_x = data['Grid/Particles/subset_Only_Ions0/Ion'].data[0]/1.0e-6      
   temp_id = data['Particles/ID/subset_Only_Ions0/Ion'].data
 
-  px = px[theta < 20]
-  grid_x = grid_x[theta < 20]
-  theta = theta[theta < 20]
+  px = px[theta < 10]
+  grid_x = grid_x[theta < 10]
+  theta = theta[theta < 10]
 
   if np.size(px) == 0:
     return 0;
-  theta[theta < -20] = -20
-  theta[theta >  20] =  20
+  theta[theta < -10] = -10
+  theta[theta >  10] =  10
 
   color_index = abs(theta)
 
@@ -139,34 +114,39 @@ def processplot(n):
 
   tkw = dict(size=20, width=1.)
 
-  x  = np.loadtxt(from_path+'ex_lineout_x.txt')
-  ex = np.loadtxt(from_path+'ex_lineout_r15_'+str(n).zfill(4)+'.txt')
+  x  = np.loadtxt(from_path+'ex_lineout_x40.txt')
+  ex = np.loadtxt(from_path+'ex_lineout_r40_'+str(n).zfill(4)+'.txt')
   p1, = par1.plot(x,ex, "-k", label="Ex")
   par1.set_ylabel(r'$E_x\ [m_ec\omega/|e|]$')
   par1.yaxis.label.set_color(p1.get_color())
   par1.tick_params(axis='y', colors=p1.get_color(), **tkw)
   par1.set_ylim(-10,15)
 
-  x  = np.loadtxt(from_path+'eden_lineout_x.txt')
-  eden = np.loadtxt(from_path+'eden_lineout_r15_'+str(n).zfill(4)+'.txt')#*exunit/denunit
+  x  = np.loadtxt(from_path+'eden_lineout_x40.txt')
+  eden = np.loadtxt(from_path+'eden_lineout_r40_'+str(n).zfill(4)+'.txt')#*exunit/denunit
   p2, = par2.plot(x,eden, "-b", label="Electron")
-  par2.set_ylabel('$n_e\ [n_c]$')
+  par2.set_ylabel('$n^-\ [n_c]$')
   par2.yaxis.label.set_color(p2.get_color())
   par2.tick_params(axis='y', colors=p2.get_color(), **tkw)
-  par2.set_ylim(0,30)
+  par2.set_ylim(0,60)
   
 
-  x  = np.loadtxt(from_path+'iden_lineout_x.txt')
-  iden = np.loadtxt(from_path+'iden_lineout_r15_'+str(n).zfill(4)+'.txt')#*exunit/denunit
-  p3, = par3.plot(x,iden, "-r", label="Ion")
-  par3.set_ylabel('$n_i\ [n_c]$')
+  x  = np.loadtxt(from_path+'iden_lineout_x40.txt')
+  iden = np.loadtxt(from_path+'iden_lineout_r40_'+str(n).zfill(4)+'.txt')#*exunit/denunit
+  cden = np.loadtxt(from_path+'cden_lineout_r40_'+str(n).zfill(4)+'.txt')#*exunit/denunit
+  p3, = par3.plot(x,iden+cden*6, "-r", label="Ion")
+  #p3, = par3.plot(x,iden, "-r", label="Ion")
+  p3, = par3.plot(x,iden, "-y", label="Ion")
+  p3, = par3.plot(x,cden*6, "-g", label="Ion")
+  par3.set_ylabel('$n^+\ [n_c]$')
   par3.yaxis.label.set_color(p3.get_color())
   par3.tick_params(axis='y', colors=p3.get_color(), **tkw)
-  par3.set_ylim(0,30)
+  par3.set_ylim(0,60)
+
 
   fig = plt.gcf()
   fig.set_size_inches(12, 7.5)
-  fig.savefig(to_path+'r15_comb_proton'+str(n).zfill(4)+'.png',format='png',dpi=80)
+  fig.savefig(to_path+'r40_comb_proton'+str(n).zfill(4)+'.png',format='png',dpi=80)
   plt.close("all")
   print('finised '+str(n).zfill(4))
   return 0

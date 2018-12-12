@@ -52,8 +52,8 @@ def make_patch_spines_invisible(ax):
         sp.set_visible(False)
 
 def processplot(n): 
-  from_path='./cannon_a190/'  
-  to_path='./cannon_a190/'  
+  from_path='./uniform_a190_n30/'  
+  to_path=from_path  
   data = sdf.read(from_path+"i_tot_loc0027.sdf",dict=True)
   #grid_x = data['Grid/Particles/subset_high_e/electron'].data[0]/wavelength
   px = data['Particles/Px/subset_Only_Ions0/Ion'].data/(1836*m0*v0)
@@ -185,11 +185,11 @@ def processplot(n):
 #  return 0
 
 if __name__ == '__main__':
-  start   =  21  # start time
+  start   =  3  # start time
   stop    =  31  # end time
   step    =  1  # the interval or step
     
   inputs = range(start,stop+step,step)
-  pool = mp.Pool(processes=10)
+  pool = mp.Pool(processes=8)
   results = pool.map(processplot,inputs)
   print(results)

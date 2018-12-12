@@ -56,8 +56,8 @@ def processplot(n):
   #youwant Derived electron_density,electron_ekbar...
   #youwant dist_fn electron_x_px...
   
-  from_path='./cannon_a190_carbon_immobile/'
-  to_path  =from_path+'figure_2d/'
+  from_path='./cannon_a190/'
+  to_path  =from_path
   
   
   n0=30.0
@@ -102,7 +102,8 @@ def processplot(n):
   #x  = data['Grid/Grid_mid'].data[0]/1.0e-6
   #y  = data['Grid/Grid_mid'].data[1]/1.0e-6
   #X, Y = np.meshgrid(x, y)
-  data = sdf.read(from_path+'q'+str(n).zfill(4)+".sdf",dict=True)
+  from_path_2='./cannon_a190_e_div/'
+  data = sdf.read(from_path_2+'q'+str(n).zfill(4)+".sdf",dict=True)
   header=data['Header']
   time=header['time']
   x  = data['Grid/Grid_mid'].data[0]/1.0e-6
@@ -112,9 +113,10 @@ def processplot(n):
   X,Y,Z = np.meshgrid(x, y, z, sparse=False, indexing='ij')
   RR = (Y**2+Z**2)**0.5
 
-  data_ne= data['Derived/Number_Density/Electron'].data/denunit
-  data_np= data['Derived/Number_Density/Ion'].data/denunit
-  data_nc= data['Derived/Number_Density/Carbon'].data/denunit
+  data_ne_in = data['Derived/Number_Density/E_in'].data/denunit+data['Derived/Number_Density/E_in_1'].data/denunit
+  data_ne_out= data['Derived/Number_Density/E_out'].data/denunit+data['Derived/Number_Density/E_out_1'].data/denunit
+  data_np= data['Derived/Number_Density/Ion'].data/denunit+data['Derived/Number_Density/Ion_1'].data/denunit
+  data_nc= data['Derived/Number_Density/Carbon'].data/denunit+data['Derived/Number_Density/Carbon_1'].data/denunit
 
 
   data_1 = sdf.read(from_path+'e_fields'+str(n).zfill(4)+".sdf",dict=True)
@@ -126,10 +128,15 @@ def processplot(n):
       n_size = eexx[-1,:].size
       value_ex = np.sum(eexx,axis=1)/n_size
 
-      eexx = data_ne[:,RR[0,:,:]<R_lim/10.]
+      eexx = data_ne_in[:,RR[0,:,:]<R_lim/10.]
 #      print(eexx.shape)
       n_size = eexx[-1,:].size
-      value_n_e = np.sum(eexx,axis=1)/n_size
+      value_n_e_in = np.sum(eexx,axis=1)/n_size
+
+      eexx = data_ne_out[:,RR[0,:,:]<R_lim/10.]
+#      print(eexx.shape)
+      n_size = eexx[-1,:].size
+      value_n_e_out = np.sum(eexx,axis=1)/n_size
 
       eexx = data_np[:,RR[0,:,:]<R_lim/10.]
 #      print(eexx.shape)
@@ -156,7 +163,7 @@ def processplot(n):
       plt.xlim(15,45)
       plt.ylim(0.,1.5)
       plt.xlabel('X [$\mu m$]',fontdict=font)
-      plt.ylabel('$p_x$ [m$_i$c]',fontdict=font)
+      plt.ylabel('$p_x$ [m$_i$c$^2$]',fontdict=font)
       plt.xticks([15,25,35,45],fontsize=25); plt.yticks([0,0.5,1.0,1.5],fontsize=25);
     #  plt.text(-100,650,' t = '++' fs',fontdict=font)
       plt.subplots_adjust(left=0.16, bottom=None, right=0.97, top=None,
@@ -183,8 +190,9 @@ def processplot(n):
       p1, = par1.plot(x,value_ex, "-",color='lime', label="$E_x$",linewidth=3)
       par1.set_ylim(0,5)
     
-      p1, = par1.plot(x,value_n_e, "-b", label="$n_e$",linewidth=3)
-      par1.set_ylim(0,5)
+      p1, = par1.plot(x,value_n_e_in+value_n_e_out, "-b", label="$n_e$",linewidth=3)
+      p1, = par1.plot(x,value_n_e_in, "-c", label="$n_e-in$",linewidth=3)
+      p1, = par1.plot(x,value_n_e_out, "-",color='orange', label="$n_e-out$",linewidth=3)
     
       p1, = par1.plot(x,value_n_p+value_n_c*6, "-r", label="$Z_in_i$",linewidth=3)
     #  p3, = par3.plot(x,iden, "-r", label="Ion")
@@ -192,14 +200,14 @@ def processplot(n):
     #  p3, = par3.plot(x,cden*6, "-g", label="Ion")
     #  par3.set_ylabel('$n^+\ [n_c]$')
     
-      par1.legend(loc='upper center',fontsize=20,framealpha=1.0)
+      par1.legend(loc='middle right',fontsize=20,framealpha=1.0)
       par1.set_ylim(0,5)
       par1.set_ylabel('$E_x$ [$m_ec\omega/|e|$] & $n_e$($Z_in_i$) [$n_c$]',fontdict=font,color='r')
       par1.tick_params(axis='y',labelsize=25,colors='r')
     
       fig = plt.gcf()
       fig.set_size_inches(12, 7.5)
-      fig.savefig(to_path+'cut_px_x_phase_'+str(n).zfill(4)+'_r'+str(R_lim).zfill(2)+'.png',format='png',dpi=160)
+      fig.savefig(from_path_2+'new_cut_px_x_phase_'+str(n).zfill(4)+'_r'+str(R_lim).zfill(2)+'.png',format='png',dpi=160)
       plt.close("all")
       print('finised cut_px_x_phase_'+str(n).zfill(4)+'_r'+str(R_lim).zfill(2)+'.png')
   return 0
