@@ -55,9 +55,9 @@ def processplot(n):
   #youwant field  ex,ey,ez,bx,by,bz,ex_averaged,bx_averaged...
   #youwant Derived electron_density,electron_ekbar...
   #youwant dist_fn electron_x_px...
-  
   to_path   = './cannon_a190_v484/'
   from_path = './cannon_a190_v484/'
+  
   
   
   ######### Script code drawing figure ################
@@ -69,34 +69,37 @@ def processplot(n):
   #x  = data['Grid/Grid_mid'].data[0]/1.0e-6
   #y  = data['Grid/Grid_mid'].data[1]/1.0e-6
   #X, Y = np.meshgrid(x, y)
-  name = 'Ion'
-  data = sdf.read(from_path+'q'+str(n).zfill(4)+".sdf",dict=True)
+  name = 'ey_averaged'
+  data = sdf.read(from_path+'e_fields'+str(n).zfill(4)+".sdf",dict=True)
   header=data['Header']
   time=header['time']
   x  = data['Grid/Grid_mid'].data[0]/1.0e-6
   y  = data['Grid/Grid_mid'].data[1]/1.0e-6
   z  = data['Grid/Grid_mid'].data[2]/1.0e-6
 
-  X,Y,Z = np.meshgrid(x, y, z, sparse=False, indexing='ij')
-  RR = (Y**2+Z**2)**0.5
+#  X,Y,Z = np.meshgrid(x, y, z, sparse=False, indexing='ij')
+#  RR = (Y**2+Z**2)**0.5
   
-  eexx = data['Derived/Number_Density/'+str.capitalize(name)].data/denunit+6.0*data['Derived/Number_Density/Carbon'].data/denunit
-  eexx = eexx[:,RR[0,:,:]<1.5]
+  eexx = data['Electric Field/'+str.capitalize(name)].data/exunit
   print(eexx.shape)
-  n_size = eexx[-1,:].size
-  ex = np.sum(eexx,axis=1)/n_size
-  np.savetxt(to_path+'iden_lineout_r15_'+str(n).zfill(4)+'.txt',ex)
-  np.savetxt(to_path+'iden_lineout_x.txt',x)
+  eexx = np.sum(eexx[:,:,179:181],axis=2)/np.size(eexx[0,0,179:181])
+  print(eexx.shape)
+  print(x.shape)
+  print(y.shape)
+  np.savetxt(to_path+'ey_lineout_data_'+str(n).zfill(4)+'.txt',eexx)
+  np.savetxt(to_path+'ey_lineout_x.txt',x)
+  np.savetxt(to_path+'ey_lineout_y.txt',y)
+
   print('finised '+str(round(100.0*(n-start+step)/(stop-start+step),4))+'%')
   return 0
 
 if __name__ == '__main__':
   start   =  1 # start time
-  stop    =  31  # end time
+  stop    =  51  # end time
   step    =  1  # the interval or step
     
   inputs = range(start,stop+step,step)
-  pool = mp.Pool(processes=5)
+  pool = mp.Pool(processes=1)
   results = pool.map(processplot,inputs)
   print(results)
 

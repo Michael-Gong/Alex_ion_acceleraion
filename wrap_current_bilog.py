@@ -51,8 +51,11 @@ for i in range(3):
 cmap = np.vstack(( lower, upper ))
 mycolormap = matplotlib.colors.ListedColormap(cmap, name='myColorMap', N=cmap.shape[0])
 
+if __name__ == '__main__':
+  start   =  23 # start time
+  stop    =  23  # end time
+  step    =  1  # the interval or step
     
-def processplot(n): 
   
   youwant = ['jx_averaged','jy_averaged','jz_averaged']
   #youwant =  ['ey','ex','ey_averaged','bz','bz_averaged'] #,'electron_en','electron_ekbar','electron_density']
@@ -69,7 +72,7 @@ def processplot(n):
   
   
   ######### Script code drawing figure ################
-  if 3>2:
+  for n in range(start,stop+step,step):
   #### header data ####
   #data = sdf.read(from_path+str(n).zfill(4)+".sdf",dict=True)
   #header=data['Header']
@@ -93,12 +96,12 @@ def processplot(n):
               jx   = (jx[:,:,n3d//2-1]+jx[:,:,n3d//2])/2 
               jy   = (jy[:,:,n3d//2-1]+jy[:,:,n3d//2])/2 
               if np.min(j_xy) == np.max(j_xy):
-                  return 0
+                  continue
               tickld = [-10,-1,0,1,10]
               tick_r = np.logspace(-0.5,1.5,20); tick_r = tick_r.tolist()
               tick_l = -np.logspace(-0.5,1.5,20); tick_l = tick_l.tolist(); tick_l.reverse()
               tick_l = tick_l + tick_r
-              #print(tick_l)
+              print(tick_l)
               plt.contourf(X, Y, jx.T, levels=tick_l, norm=mcolors.SymLogNorm(linthresh=10**(-0.5), linscale=0.2, vmin=-10**1.5,  vmax=10**1.5), cmap='RdBu')
               eee=100. #np.max([-np.min(ex.T),np.max(ex.T)])
               #levels = np.logspace(-1, 2, 40)
@@ -137,12 +140,12 @@ def processplot(n):
               jx   = (jx[:,n3d//2-1,:]+jx[:,n3d//2,:])/2 
               jz   = (jz[:,n3d//2-1,:]+jz[:,n3d//2,:])/2 
               if np.min(j_xz) == np.max(j_xz):
-                  return 0
+                  continue
               tickld = [-10,-1,0,1,10]
               tick_r = np.logspace(-0.5,1.5,20); tick_r = tick_r.tolist()
               tick_l = -np.logspace(-0.5,1.5,20); tick_l = tick_l.tolist(); tick_l.reverse()
               tick_l = tick_l + tick_r
-              #print(tick_l)
+              print(tick_l)
               plt.contourf(X, Y, jx.T, levels=tick_l, norm=mcolors.SymLogNorm(linthresh=10**(-0.5), linscale=0.2, vmin=-10**1.5,  vmax=10**1.5), cmap='RdBu')
               #plt.contourf(X, Y, jx.T, levels=tick_l, cmap='RdBu')
               #### manifesting colorbar, changing label and axis properties ####
@@ -172,12 +175,12 @@ def processplot(n):
               jx   = (jx[:,:,n3d//2-1]+jx[:,:,n3d//2])/2 
               jy   = (jy[:,:,n3d//2-1]+jy[:,:,n3d//2])/2 
               if np.min(j_xy) == np.max(j_xy):
-                  return 0
+                  continue
               tickld = [-10,-1,0,1,10]
               tick_r = np.logspace(-0.5,1.5,20); tick_r = tick_r.tolist()
               tick_l = -np.logspace(-0.5,1.5,20); tick_l = tick_l.tolist(); tick_l.reverse()
               tick_l = tick_l + tick_r
-              #print(tick_l)
+              print(tick_l)
               plt.contourf(X, Y, jx.T, levels=tick_l, norm=mcolors.SymLogNorm(linthresh=10**(-0.5), linscale=0.2, vmin=-10**1.5,  vmax=10**1.5), cmap='RdBu')
               #plt.contourf(X, Y, jx.T, norm=mcolors.SymLogNorm(linthresh=0.03, linscale=0.03, vmin=-30.0,  vmax=30.0), cmap='RdBu_r')
               #### manifesting colorbar, changing label and axis properties ####
@@ -201,12 +204,12 @@ def processplot(n):
               jx   = (jx[:,n3d//2-1,:]+jx[:,n3d//2,:])/2 
               jz   = (jz[:,n3d//2-1,:]+jz[:,n3d//2,:])/2 
               if np.min(j_xz) == np.max(j_xz):
-                  return 0
+                  continue
               tickld = [-10,-1,0,1,10]
               tick_r = np.logspace(-0.5,1.5,20); tick_r = tick_r.tolist()
               tick_l = -np.logspace(-0.5,1.5,20); tick_l = tick_l.tolist(); tick_l.reverse()
               tick_l = tick_l + tick_r
-              #print(tick_l)
+              print(tick_l)
               plt.contourf(X, Y, jx.T, levels=tick_l, norm=mcolors.SymLogNorm(linthresh=10**(-0.5), linscale=0.2, vmin=-10**1.5,  vmax=10**1.5), cmap='RdBu')
               #plt.contourf(X, Y, jx.T, norm=mcolors.SymLogNorm(linthresh=0.03, linscale=0.03, vmin=-30.0,  vmax=30.0), cmap='RdBu_r')
               #### manifesting colorbar, changing label and axis properties ####
@@ -227,15 +230,5 @@ def processplot(n):
               fig.savefig('./J_cut=0_bilog'+str(n).zfill(4)+'.png',format='png',dpi=100)
               plt.close("all")
               print('finised '+str(round(100.0*(n-start+step)/(stop-start+step),4))+'%')
-              return 0
 
 
-if __name__ == '__main__':
-  start   =  12 # start time
-  stop    =  12  # end time
-  step    =  1  # the interval or step
-    
-  inputs = range(start,stop+step,step)
-  pool = mp.Pool(processes=1)
-  results = pool.map(processplot,inputs)
-  print(results)

@@ -55,8 +55,8 @@ def processplot(n):
   #youwant field  ex,ey,ez,bx,by,bz,ex_averaged,bx_averaged...
   #youwant Derived electron_density,electron_ekbar...
   #youwant dist_fn electron_x_px...
-  to_path='./cannon_a190/'
-  from_path = to_path
+  to_path='./cannon_a190_v484/'
+  from_path = './cannon_a190_v484/'
   
   
   
@@ -81,21 +81,22 @@ def processplot(n):
   RR = (Y**2+Z**2)**0.5
   
   eexx = data['Electric Field/'+str.capitalize(name)].data/exunit
-  eexx = eexx[:,RR[0,:,:]<4.0]
+  eexx = eexx[:,RR[0,:,:]<1.5]
   print(eexx.shape)
   n_size = eexx[-1,:].size
   ex = np.sum(eexx,axis=1)/n_size
-  np.savetxt(to_path+'ex_lineout_r40_'+str(n).zfill(4)+'.txt',ex)
-  np.savetxt(to_path+'ex_lineout_x40.txt',x)
+  np.savetxt(to_path+'ex_lineout_r15_'+str(n).zfill(4)+'.txt',ex)
+  np.savetxt(to_path+'ex_lineout_x.txt',x)
   print('finised '+str(round(100.0*(n-start+step)/(stop-start+step),4))+'%')
   return 0
 
 if __name__ == '__main__':
   start   =  1 # start time
-  stop    =  31  # end time
+  stop    =  51  # end time
   step    =  1  # the interval or step
     
   inputs = range(start,stop+step,step)
-  pool = mp.Pool(processes=5)
+  pool = mp.Pool(processes=1)
   results = pool.map(processplot,inputs)
   print(results)
+

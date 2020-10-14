@@ -17,6 +17,8 @@ from mpl_toolkits.mplot3d import Axes3D
 import multiprocessing as mp
 
 
+
+
 ######## Constant defined here ########
 pi        =     3.1415926535897932384626
 q0        =     1.602176565e-19 # C
@@ -44,6 +46,14 @@ font = {'family' : 'monospace',
 
 font_size = 20
 
+upper = matplotlib.cm.magma_r(np.arange(256))
+lower = np.ones((int(256/4),4))
+for i in range(3):
+    lower[:,i] = np.linspace(1, upper[0,i], lower.shape[0])
+cmap = np.vstack(( lower, upper ))
+mycolor_magma_r = matplotlib.colors.ListedColormap(cmap, name='myColorMap', N=cmap.shape[0])
+
+
 
 def make_patch_spines_invisible(ax):
     ax.set_frame_on(True)
@@ -52,8 +62,8 @@ def make_patch_spines_invisible(ax):
         sp.set_visible(False)
 
 def processplot(n): 
-  from_path='./uniform_a190_n30/'  
-  to_path=from_path  
+  from_path='./cannon_a190_v484/'  
+  to_path='./cannon_a190_v484_fig/'  
   data = sdf.read(from_path+"i_tot_loc0027.sdf",dict=True)
   #grid_x = data['Grid/Particles/subset_high_e/electron'].data[0]/wavelength
   px = data['Particles/Px/subset_Only_Ions0/Ion'].data/(1836*m0*v0)
@@ -64,8 +74,8 @@ def processplot(n):
   Ek = (gg-1)*1836*0.51
 
   part_id = data['Particles/ID/subset_Only_Ions0/Ion'].data
-  part13_id = part_id[ (Ek>5) ]
-  part13_id_2 = part_id[ (Ek>225) & (abs(theta)<10) & (Ek<245)]
+  part13_id = part_id[ (Ek>20) ]
+  part13_id_2 = part_id[ (Ek>220) & (abs(theta)<10) & (Ek<240)]
 
 #  choice = np.random.choice(range(part13_id.size), 2000, replace=False)
 #  part13_id = part13_id[choice]
@@ -128,8 +138,9 @@ def processplot(n):
   makersize = 0.01
 #    plt.subplot()
   #normalize = matplotlib.colors.Normalize(vmin=0, vmax=20, clip=True)
-  pt3d=ax.scatter(grid_x_1, grid_y_1, grid_z_1, c=color_index, s=makersize*10, cmap='magma', edgecolors='face', alpha=1.0, marker='.')
-#  pt3d_2=ax.scatter(grid_x_2, grid_y_2, grid_z_2, c='springgreen', s=makersize*1, edgecolors='face', alpha=1.0, marker='.')
+  pt3d_2=ax.scatter(grid_x_2, grid_y_2, grid_z_2, c='lime', s=makersize*30, edgecolors='face', alpha=1, marker='.',lw=0)
+  condition= (abs(grid_y_1)>-1) # (grid_y_1>0) | (grid_z_1<0)
+  pt3d=ax.scatter(grid_x_1[condition], grid_y_1[condition], grid_z_1[condition], c=color_index[condition], s=makersize*40, cmap='magma', edgecolors='face', alpha=0.8, marker='.',lw=0,norm=colors.Normalize(vmin=0,vmax=500))
 
   cbar=plt.colorbar(pt3d, ticks=np.linspace(np.min(color_index), np.max(color_index), 5) ,pad=0.05)
   cbar.ax.set_yticklabels(cbar.ax.get_yticklabels(), fontsize=20)
@@ -152,6 +163,7 @@ def processplot(n):
 
   ax.grid(linestyle='--', linewidth='0.5', color='grey')
   ax.view_init(elev=45, azim=-45)
+#  ax.view_init(elev=None, azim=None)
 
   ax.xaxis.pane.set_edgecolor('black')
   ax.yaxis.pane.set_edgecolor('black')
@@ -161,12 +173,14 @@ def processplot(n):
   ax.w_yaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
   ax.w_zaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
 
-  ax.scatter(grid_x_1,grid_z_1,c=color_index,s=makersize*10, alpha=0.5,zdir='y',zs=19,cmap='magma',marker='.')
-#  ax.scatter(grid_x_2,grid_z_2,c='springgreen',s=makersize*1, alpha=0.5,zdir='y',zs=19,marker='.')
-  ax.scatter(grid_x_1,grid_y_1,c=color_index,s=makersize*10, alpha=0.5,zdir='z',zs=-19,cmap='magma',marker='.')
-#  ax.scatter(grid_x_2,grid_y_2,c='springgreen',s=makersize*1, alpha=0.5,zdir='z',zs=-19,marker='.')
-  ax.scatter(grid_y_1,grid_z_1,c=color_index,s=makersize*10, alpha=0.5,zdir='x',zs=0,cmap='magma',marker='.')
-#  ax.scatter(grid_y_2,grid_z_2,c='springgreen',s=makersize*1, alpha=0.5,zdir='x',zs=0,marker='.')
+  ax.scatter(grid_x_1,grid_z_1,c=color_index,s=makersize*25, alpha=0.5,zdir='y',zs=19,cmap='magma',marker='.',lw=0)
+  ax.scatter(grid_x_2,grid_z_2,c='lime',s=makersize*20, alpha=0.5,zdir='y',zs=19,marker='.',lw=0)
+
+  ax.scatter(grid_x_2,grid_y_2,c='lime',s=makersize*20, alpha=0.5,zdir='z',zs=-19,marker='.',lw=0)
+  ax.scatter(grid_x_1,grid_y_1,c=color_index,s=makersize*25, alpha=0.5,zdir='z',zs=-19,cmap='magma',marker='.',lw=0)
+
+  ax.scatter(grid_y_1,grid_z_1,c=color_index,s=makersize*15, alpha=0.5,zdir='x',zs=0,cmap='magma',marker='.',lw=0)
+  ax.scatter(grid_y_2,grid_z_2,c='lime',s=makersize*20, alpha=0.5,zdir='x',zs=0,marker='.',lw=0)
 
 
 #  plt.text(-100,650,' t = '++' fs',fontdict=font)
@@ -185,11 +199,11 @@ def processplot(n):
 #  return 0
 
 if __name__ == '__main__':
-  start   =  3  # start time
+  start   =  1  # start time
   stop    =  31  # end time
   step    =  1  # the interval or step
     
   inputs = range(start,stop+step,step)
-  pool = mp.Pool(processes=8)
+  pool = mp.Pool(processes=10)
   results = pool.map(processplot,inputs)
   print(results)

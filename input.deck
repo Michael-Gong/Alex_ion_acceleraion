@@ -1,0 +1,272 @@
+begin:constant
+  wavelength = 1.0 * micron
+  Twave = wavelength / c
+  critical_density= me*epsilon0*(2.0*pi*c/wavelength)^2/(qe)^2
+  den_max=10.0*critical_density
+  intens=5.0e22
+  omega1=2.0*pi*c/(wavelength)
+  las_lambda=1.0e-6
+  las_k=2.0*pi/las_lambda
+  den_crit=critical(omega1) #per cubic metre
+  scale=3.5e-6 #microns
+  min_x=2e-6
+  las_scale_y=1.0e-6
+  xf = 5*1.0e-6
+  w0 = 2.2*1.0e-6 #original - 1.1
+  rayl=pi*w0^2/las_lambda
+  sG = xf/rayl
+  wb = w0*sqrt(1+sG^2)
+  DyU = 0*1.5*1.0e-6
+  DyL = -DyU
+  R = 1.8 #0.9
+end:constant
+
+begin:control
+  nx=60*20  #20 in 3D; 100 cells in 2D with 8500 in total 
+  ny=12*30 #OLD RESOLUTION: for +/- 15um; 15 in 3D; 100 cells in 2D with 3000 in total
+  nz=ny 
+  t_end = 400e-15
+  x_min = -5e-6
+  x_max = 55.0e-6
+  y_min = -12.0e-6
+  y_max = 12.0e-6
+  z_min = -12.0e-6
+  z_max = 12.0e-6
+  dlb_threshold=0.5
+ # restart_snapshot=0003
+  print_constants = T
+end:control
+
+begin:boundaries
+  bc_x_min_field = simple_laser
+  bc_x_max_field = open
+  bc_x_min_particle = open
+  bc_x_max_particle = open
+  bc_y_min_field = open
+  bc_y_max_field = open
+  bc_y_min_particle = open
+  bc_y_max_particle = open
+  bc_z_min = open
+  bc_z_max = open
+end:boundaries
+
+begin:species
+  name=Electron
+  charge=-1.0
+  mass=1.0
+  npart_per_cell=10
+  dump=T
+  temp=0
+  rho=den_max
+  rho=if(sqrt(y*y+z*z) gt 10*micron,0,rho(Electron))
+  rho=if(x gt 15*micron,0,rho(Electron))
+  rho=if(x lt 0*micron,0,rho(Electron))
+  rho=if(sqrt(y*y+z*z) gt R*micron,10.0*rho(Electron),rho(Electron))
+  rho=if(sqrt(y*y+z*z) lt R*micron,3.0*rho(Electron),rho(Electron))
+  minrho=1e20
+  identify:electron
+end:species
+
+begin:species
+  name=Carbon
+  charge=6.0
+  mass=1836.0*(12.011/1.01)
+  npart_per_cell=10
+  dump=T
+  rho=rho(Electron)/6.0
+  temp=0
+  minrho=1000
+  rho=if(sqrt(y*y+z*z) gt R*micron,rho(Carbon),0)
+end:species
+
+begin:species
+  name=Ion
+  charge=1.0
+  mass=1836.0
+  npart_per_cell=50
+  dump=T
+  rho=rho(Electron)/1.0
+  temp=0
+  minrho=1000
+  rho=if(sqrt(y*y+z*z) lt R*micron,rho(Ion),0)
+end:species
+
+#begin:output
+#  name = restart_dumps
+#  dt_snapshot=100.0e-15
+#  dt_average = 1*Twave
+#  restartable=T
+#  dump_first = F
+#  time_start = 150.0e-15 
+#end:output
+
+begin:output
+  disabled = F
+  name=dist
+  file_prefix=dist
+  dt_snapshot=10.0*femto
+  dt_average = 1*Twave
+  distribution_functions=always
+end:output
+
+begin:output
+  disabled = F
+  name = e_fields
+  file_prefix = e_fields
+  dt_snapshot=10.0*femto
+  dt_average = 1*Twave
+  dump_first = T
+  ex=always + single + average + snapshot
+  ey=always + single + average + snapshot
+  ez=always + single + average + snapshot
+  time_start = 100.0e-15
+end:output
+
+begin:output
+  disabled = F
+  name = b_fields
+  file_prefix = b_fields
+  dt_snapshot=10.0*femto
+  dt_average = 1*Twave
+  dump_first = T
+  bx=always + single + average + snapshot
+  by=always + single + average + snapshot
+  bz=always + single + average + snapshot
+  time_start = 100.0e-15
+end:output
+
+begin:output
+  disabled = F
+  name = current
+  file_prefix = current
+  dt_snapshot=10.0*femto
+  dt_average = 1*Twave
+  dump_first = T
+  jx=always + single + average + snapshot
+  jy=always + single + average + snapshot
+  jz=always + single + average + snapshot
+  time_start = 100.0e-15
+end:output
+
+begin:output
+  disabled = F
+  name = q
+  file_prefix = q
+  dt_snapshot= 10.0*femto
+  dt_average = 1*Twave
+  dump_first = T
+  charge_density=always + single + average + snapshot
+  number_density=always + single + average + snapshot + species + no_sum
+  time_start = 100.0e-15
+end:output
+
+begin:output
+  disabled = F
+  name = abs
+  file_prefix = abs
+  dt_snapshot=10.0*femto
+  dt_average = 1*Twave
+  dump_first = T
+  absorption = always + single
+  total_energy_sum = always + single
+  time_start = 10.0e-15
+end:output
+
+begin:output
+  disabled = F
+  name = ekbar
+  file_prefix = ekbar
+  dump_first = T
+  dt_snapshot = 10.0*femto
+  dt_average = 1*Twave
+  ekbar = always + species + single + average + no_sum
+  time_start = 100.0e-15
+end:output
+
+begin:output
+   disabled = F
+   name=i_loc
+   file_prefix=i_loc
+   dt_snapshot=10.0*femto
+   dt_average = 1*Twave
+   particle_grid = Only_Ions0 + single
+   id = Only_Ions0
+   particle_energy = Only_Ions0 + single
+   time_start = 100.0e-15
+end:output
+
+begin:output
+   name=i_tot_loc
+   file_prefix=i_tot_loc
+   dt_snapshot=10.0*femto
+   dt_average = 1*Twave
+   particle_grid = Only_Ions0 + Only_Energetic_Electrons  + single
+   id = Only_Ions0 + Only_Energetic_Electrons
+#   particle_energy = Only_Ions0 + single
+   px = Only_Ions0 + Only_Energetic_Electrons + single
+   py = Only_Ions0 + Only_Energetic_Electrons + single
+   pz = Only_Ions0 + Only_Energetic_Electrons + single
+   time_start = 100.0e-15
+end:output
+
+begin:subset
+  name = Only_Electrons  
+  include_species:Electron
+end:subset
+
+begin:subset
+  name = Only_Carbon
+  include_species:Carbon
+end:subset
+
+begin:subset
+  name = Only_Ions
+  include_species:Ion
+  gamma_min = 1.01
+end:subset
+
+begin:subset
+  name = Only_Energetic_Carbon
+  include_species:Carbon
+  gamma_min = 1.01
+end:subset
+
+begin:subset
+  name = Only_Energetic_Electrons
+  include_species:Electron
+  gamma_min = 600.00
+  y_min = -8.0e-6
+  y_max =  8.0e-6
+end:subset
+
+begin:subset
+  name = Only_Ions0
+  include_species:Ion
+  x_min = 10.0e-6
+end:subset
+
+begin:laser
+  #id=1 
+  boundary=x_min
+  id=1
+  intensity_w_cm2=intens/(1+sG^2) #intensity at the boundary
+  omega=omega1
+#  t_profile=if(time lt 150e-15, gauss(time,150e-15,60e-15), 1.0)
+  t_profile=gauss(time,150e-15,60e-15)
+  profile=exp(-((sqrt(y*y+z*z)/wb)^2))
+  phase=sG*((sqrt(y*y+z*z)/w0)^2)/(1+sG^2)
+end:laser
+
+begin:dist_fn
+  name=en
+  ndims=1
+  dumpmask=always
+  direction1=dir_en
+  #range is ignored for spatial coordinates
+  range1=(0,0)
+  #resolution is ignored for spatial coordinates
+  resolution1=2500
+  include_species:Electron
+  include_species:Ion
+  include_species:Carbon
+end:dist_fn

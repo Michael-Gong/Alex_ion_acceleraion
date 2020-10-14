@@ -60,8 +60,8 @@ def create_alpha(func):
 
 
 def processplot(n): 
-    from_path='./uniform_a190_n30/'
-    to_path=from_path
+    from_path ='./cannon_a190_v484/'
+    to_path   ='./cannon_a190_v484_fig/'
     x_start=100; x_stop=700; y_start=60; y_stop=300; z_start=60; z_stop=300;
     x_size = x_stop-x_start; y_size = y_stop-y_start; z_size = z_stop-z_start
     name = 'Ex_averaged'
@@ -241,11 +241,11 @@ def processplot(n):
     fig.set_size_inches(20, 10.5)
     fig.savefig(to_path+'3d_'+name+str(n).zfill(4)+'.png',format='png',dpi=160)
     plt.close("all")
-    print('finised '+str(n).zfill(4))
+    fig.savefig(to_path+'3d_'+name+str(n).zfill(4)+'.png')
     #print('here5')
 
 if __name__ == '__main__':
-  start   =  1 # start time
+  start   =  6 # start time
   stop    =  31  # end time
   step    =  1  # the interval or step
     
@@ -253,3 +253,4 @@ if __name__ == '__main__':
   pool = mp.Pool(processes=5)
   results = pool.map(processplot,inputs)
   print(results)
+

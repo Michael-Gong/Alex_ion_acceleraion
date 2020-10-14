@@ -56,7 +56,7 @@ def processplot(n):
   #youwant Derived electron_density,electron_ekbar...
   #youwant dist_fn electron_x_px...
   
-  to_path='./cannon_a190/'
+  to_path='./cannon_a190_v484/'
   from_path = to_path
   
   
@@ -79,14 +79,14 @@ def processplot(n):
 
   X,Y,Z = np.meshgrid(x, y, z, sparse=False, indexing='ij')
   RR = (Y**2+Z**2)**0.5
-  for R_lim in range(5,45,5): 
-      eexx = data['Derived/Number_Density/'+str.capitalize(name)].data/denunit
-      eexx = eexx[:,RR[0,:,:]<R_lim/10.]
-      print(eexx.shape)
-      n_size = eexx[-1,:].size
-      ex = np.sum(eexx,axis=1)/n_size
-      np.savetxt(to_path+'eden_lineout_r'+str(R_lim).zfill(2)+'_'+str(n).zfill(4)+'.txt',ex)
-      np.savetxt(to_path+'eden_lineout_x'+str(R_lim).zfill(2)+'.txt',x)
+  
+  eexx = data['Derived/Number_Density_averaged/'+str.capitalize(name)].data/denunit
+  eexx = eexx[:,RR[0,:,:]<1.5]
+  print(eexx.shape)
+  n_size = eexx[-1,:].size
+  ex = np.sum(eexx,axis=1)/n_size
+  np.savetxt(to_path+'eden_lineout_r15_'+str(n).zfill(4)+'.txt',ex)
+  np.savetxt(to_path+'eden_lineout_x.txt',x)
   print('finised '+str(round(100.0*(n-start+step)/(stop-start+step),4))+'%')
   return 0
 
@@ -96,6 +96,7 @@ if __name__ == '__main__':
   step    =  1  # the interval or step
     
   inputs = range(start,stop+step,step)
-  pool = mp.Pool(processes=8)
+  pool = mp.Pool(processes=5)
   results = pool.map(processplot,inputs)
   print(results)
+

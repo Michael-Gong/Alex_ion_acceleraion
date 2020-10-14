@@ -44,7 +44,7 @@ font = {'family' : 'monospace',
 font2 = {'family' : 'monospace',  
         'color'  : 'black',  
         'weight' : 'normal',  
-        'size'   : 18,  
+        'size'   : 20,  
         }  
 
 def make_patch_spines_invisible(ax):
@@ -59,8 +59,8 @@ if __name__ == '__main__':
   step    =  1  # the interval or step
     
   
-  from_path = './cannon_a190/'
-  to_path   = './cannon_a190/'
+  from_path = './cannon_a190_v484/'
+  to_path   = './cannon_a190_v484/'
   
   data = sdf.read(from_path+"i_tot_loc0027.sdf",dict=True)
   #grid_x = data['Grid/Particles/subset_high_e/electron'].data[0]/wavelength
@@ -72,7 +72,7 @@ if __name__ == '__main__':
   Ek = (gg-1)*1836*0.51
 
   part13_id = data['Particles/ID/subset_Only_Ions0/Ion'].data
-  part13_id = part13_id[ (Ek>225) & (abs(theta)<10) & (Ek<245)]
+  part13_id = part13_id[ (Ek>220) & (abs(theta)<10) & (Ek<240)]
 
   print('part13_id size is ',part13_id.size,' max ',np.max(part13_id),' min ',np.min(part13_id))
   
@@ -113,10 +113,10 @@ if __name__ == '__main__':
 #plt.plot(np.linspace(-500,900,1001), np.linspace(-500,900,1001),'-g',linewidth=3)
 #plt.plot(np.linspace(-500,900,1001), 200-np.linspace(-500,900,1001),'-',color='grey',linewidth=3)
  #   plt.legend(loc='upper right')
-  cax = fig.add_axes([0.25,0.8,0.5,0.02])
-  cbar = fig.colorbar(img,cax=cax,label='time [fs]', ticks=[200,240,280,320,360], orientation='horizontal')
-  cbar.set_label('time [fs]',fontdict=font2)
-  cbar.ax.set_xticklabels(cbar.ax.get_xticklabels(),fontsize=18)
+#  cax = fig.add_axes([0.25,0.8,0.5,0.02])
+#  cbar = fig.colorbar(img,cax=cax,label='time [fs]', ticks=[200,240,280,320,360], orientation='horizontal')
+#  cbar.set_label('time [fs]',fontdict=font2)
+#  cbar.ax.set_xticklabels(cbar.ax.get_xticklabels(),fontsize=18)
 
   ax1.set_xlim(10,45)
   ax1.set_ylim(0.,1.)
@@ -127,8 +127,8 @@ if __name__ == '__main__':
   ax1.grid(linestyle='--', linewidth=0.4, color='grey')
 
   ax2.set_ylim(0.,25)
-  ax2.set_ylabel('$E_x$ [$m_ec\omega/|e|$]',fontdict=font,color='r')
-  ax2.tick_params(axis='y',labelsize=25,colors='r')
+  ax2.set_ylabel('$E_x$ [$m_ec\omega/|e|$]',fontdict=font,color='k')
+  ax2.tick_params(axis='y',labelsize=25,colors='k')
 #  plt.text(-100,650,' t = '++' fs',fontdict=font)
   plt.subplots_adjust(left=0.12, bottom=None, right=0.90, top=None,
                 wspace=None, hspace=None)
@@ -147,3 +147,4 @@ if __name__ == '__main__':
   fig.savefig('./wrap_ion_energy_chirp.png',format='png',dpi=160)
   plt.close("all")
   print('finised ')
+

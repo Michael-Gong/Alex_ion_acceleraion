@@ -48,9 +48,8 @@ def processplot(n):
   #stop    =  30  # end time
   #step    =  1  # the interval or step
   
-  #youwant = ['E_u_1_density','E_u_density','Ion_density','Ion_1_density']
-  #youwant = ['Carbon_density']
-  youwant =  ['ey','ex','ey_averaged','bz','bz_averaged','Electron_ekbar','Electron_density','Ion_density','Ion_ekbar','Carbon_density','Carbon_ekbar','ex_averaged']
+  youwant = ['Electron_density','Ion_density','Electron_ekbar','Ion_ekbar','ex','ey','bz','ex_averaged','ey_averaged','bz_averaged']
+  #youwant =  ['ey','ex','ey_averaged','bz','bz_averaged'] #,'electron_en','electron_ekbar','electron_density']
   #youwant.append('Ion_ekbar')
   #youwant.append('positron_ekbar')
   #youwant.append('electron_en')
@@ -59,8 +58,9 @@ def processplot(n):
   #youwant Derived electron_density,electron_ekbar...
   #youwant dist_fn electron_x_px...
   
-  from_path = './cannon_a190_infinite/'
-  to_path=from_path 
+  from_path = './cannon_a190_bulk200/'
+  to_path   = './cannon_a190_bulk200/'
+  
   
   ######### Script code drawing figure ################
   #for n in range(start,stop+step,step):
@@ -272,11 +272,11 @@ def processplot(n):
   return 0
 
 if __name__ == '__main__':
-  start   =  10 # start time
+  start   =  3 # start time
   stop    =  31  # end time
   step    =  1  # the interval or step
     
   inputs = range(start,stop+step,step)
-  pool = mp.Pool(processes=4)
+  pool = mp.Pool(processes=10)
   results = pool.map(processplot,inputs)
   print(results)

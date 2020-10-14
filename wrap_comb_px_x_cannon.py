@@ -56,8 +56,8 @@ def processplot(n):
   #youwant Derived electron_density,electron_ekbar...
   #youwant dist_fn electron_x_px...
   
-  from_path='./cannon_a190_carbon_immobile/'
-  to_path  =from_path+'figure_2d/'
+  from_path='./cannon_a190/'
+  to_path  =from_path
   
   
   n0=30.0
@@ -156,7 +156,7 @@ def processplot(n):
       plt.xlim(15,45)
       plt.ylim(0.,1.5)
       plt.xlabel('X [$\mu m$]',fontdict=font)
-      plt.ylabel('$p_x$ [m$_i$c]',fontdict=font)
+      plt.ylabel('$p_x$ [m$_i$c$^2$]',fontdict=font)
       plt.xticks([15,25,35,45],fontsize=25); plt.yticks([0,0.5,1.0,1.5],fontsize=25);
     #  plt.text(-100,650,' t = '++' fs',fontdict=font)
       plt.subplots_adjust(left=0.16, bottom=None, right=0.97, top=None,
